@@ -1,0 +1,15 @@
+name: karc
+
+services:
+  bot:
+    build: .
+    restart: "on-failure:3"
+    env_file: .env
+    environment:
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "node", "scripts/healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

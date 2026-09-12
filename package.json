@@ -1,0 +1,38 @@
+{
+  "name": "karc",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.x"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "start:prod": "node dist/index.js",
+    "deploy:dev": "tsx scripts/deploy-dev.ts",
+    "deploy": "tsx scripts/deploy.ts",
+    "db:generate": "prisma generate",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.9",
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.2.3",
+    "linkify-it": "^6.1.0",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/linkify-it": "^5.0.0",
+    "@types/node": "^26.0.0",
+    "@types/pg": "^8.11.0",
+    "prisma": "^7.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^7.0.0"
+  }
+}

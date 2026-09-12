@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Add models below ──────────────────────────────────────────────────────────
+
+model Group {
+  id        String            @id @default(cuid())
+  codeName  String            @unique
+  name      String
+  ownerId   String
+  guildId   String
+  roles     GroupRole[]
+  members   GroupRoleMember[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model GroupRole {
+  id                   String                 @id @default(cuid())
+  groupId              String
+  group                Group                  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  discordRoleId        String?
+  color                String?
+  name                 String
+  subName              String?
+  position             Int
+  canManageAssignments Boolean                @default(false)
+  canManageGroup       Boolean                @default(false)
+  members              GroupRoleMember[]
+  progressionsFrom     GroupRoleProgression[] @relation("ProgressionFrom")
+  progressionsTo       GroupRoleProgression[] @relation("ProgressionTo")
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  @@unique([groupId, name])
+}
+
+model GroupRoleProgression {
+  fromRoleId String
+  fromRole   GroupRole @relation("ProgressionFrom", fields: [fromRoleId], references: [id], onDelete: Cascade)
+  toRoleId   String
+  toRole     GroupRole @relation("ProgressionTo",   fields: [toRoleId],   references: [id], onDelete: Cascade)
+
+  @@id([fromRoleId, toRoleId])
+}
+
+model GroupRoleMember {
+  id            String    @id @default(cuid())
+  groupId       String
+  group         Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupRoleId   String
+  groupRole     GroupRole @relation(fields: [groupRoleId], references: [id], onDelete: Cascade)
+  userId        String
+  characterName String
+  assignedAt    DateTime  @default(now())
+
+  @@unique([groupId, characterName, userId])
+}
