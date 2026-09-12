@@ -2,7 +2,10 @@ import { ButtonInteraction, MessageFlags } from 'discord.js';
 import { db } from '../../../db/index.js';
 import { loadAuthorizedSession, renderPanel } from './editShared.js';
 
-const PAGE_SIZE = 10;
+// Each residence row costs 3 components (Section + its text + its accessory button); with the
+// container/header/dividers/nav-rows overhead, Discord's 40-component-per-message cap for
+// Components V2 caps this well below 10 per page — keep real headroom below that ceiling.
+const PAGE_SIZE = 5;
 
 function buildResidenceListComponents(
     sessionId:           string,

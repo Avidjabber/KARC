@@ -20,8 +20,22 @@ export default async function interactionCreate(
         try {
             await dispatch(handlers, interaction);
         } catch (err) {
-            if ((err as { code?: number }).code !== 10062) {
-                console.error('Unhandled error in component handler:', err);
+            if ((err as { code?: number }).code === 10062) return;
+            console.error('Unhandled error in component handler:', err);
+
+            const container = new ContainerBuilder()
+                .setAccentColor(colors.error)
+                .addTextDisplayComponents(
+                    new TextDisplayBuilder().setContent('Something went wrong. Please try again.'),
+                );
+            const payload = {
+                flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+                components: [container],
+            };
+            if (interaction.replied || interaction.deferred) {
+                await interaction.editReply(payload).catch(() => null);
+            } else {
+                await interaction.reply(payload).catch(() => null);
             }
         }
         return;
