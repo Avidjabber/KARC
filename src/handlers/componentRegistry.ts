@@ -42,6 +42,7 @@ import {
     handleEditPanelResidenceClear,
 } from '../commands/Aggregate/Character/editResidenceHandlers.js';
 import { handleCharacterDeleteSelect, handleCharacterDeleteConfirm, handleCharacterDeleteCancel } from '../commands/Aggregate/Character/deleteHandlers.js';
+import { handleCharacterInfoSelect } from '../commands/Aggregate/Character/infoHandlers.js';
 
 type AnyComponentInteraction =
     | MessageComponentInteraction
@@ -85,6 +86,7 @@ export const selectMenuHandlers: ComponentHandler[] = [
     { prefix: 'character_edit_select', handler: i => handleCharacterEditSelect(i as StringSelectMenuInteraction) },
     { prefix: 'character_delete_select', handler: i => handleCharacterDeleteSelect(i as StringSelectMenuInteraction) },
     { prefix: 'character_editpanel_career_select:', handler: i => handleEditPanelCareerSelect(i as StringSelectMenuInteraction) },
+    { prefix: 'character_info_select', handler: i => handleCharacterInfoSelect(i as StringSelectMenuInteraction) },
 ];
 
 // ── Button handlers ────────────────────────────────────────────────────────────

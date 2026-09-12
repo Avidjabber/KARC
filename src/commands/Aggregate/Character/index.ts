@@ -3,6 +3,7 @@ import { execute as characterCreate } from './create.js';
 import { execute as characterEdit } from './edit.js';
 import { execute as characterList } from './list.js';
 import { execute as characterDelete } from './delete.js';
+import { execute as characterInfo } from './info.js';
 
 export const data = new SlashCommandBuilder()
     .setName('character')
@@ -32,9 +33,21 @@ export const data = new SlashCommandBuilder()
         sub
             .setName('delete')
             .setDescription('Delete one of your characters'),
+    )
+    .addSubcommand(sub =>
+        sub
+            .setName('info')
+            .setDescription("View a character's info card")
+            .addUserOption(opt =>
+                opt
+                    .setName('user')
+                    .setDescription("View this member's character instead of your own")
+                    .setRequired(false),
+            ),
     );
 
-export const modalSubcommands = new Set(['create', 'edit']);
+export const modalSubcommands  = new Set(['create', 'edit']);
+export const publicSubcommands = new Set(['info']);
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
     const sub = interaction.options.getSubcommand();
@@ -42,4 +55,5 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     if (sub === 'edit')   return characterEdit(interaction);
     if (sub === 'list')   return characterList(interaction);
     if (sub === 'delete') return characterDelete(interaction);
+    if (sub === 'info')   return characterInfo(interaction);
 }
