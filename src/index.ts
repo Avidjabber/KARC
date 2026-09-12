@@ -38,7 +38,9 @@ async function start(): Promise<void> {
     await db.$connect();
     console.log('[startup] Database connected.');
 
-    await client.login(process.env.BOT_TOKEN?.trim());
+    const token = process.env.BOT_TOKEN?.trim();
+    console.log(`[startup] BOT_TOKEN length: ${token?.length ?? 'undefined'}`);
+    await client.login(token);
 }
 
 start().catch(err => {
