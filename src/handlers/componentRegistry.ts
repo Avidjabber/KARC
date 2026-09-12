@@ -24,6 +24,8 @@ import { handleGroupPickPage, handleGroupPickView } from '../commands/Aggregate/
 import { handleRemoveCharSelect } from '../commands/Aggregate/Roles/removeCharSelectHandlers.js';
 import { handleRemoveConfirm, handleRemoveCancel } from '../commands/Aggregate/Roles/removeConfirmHandlers.js';
 import { handleAssignMoveConfirm, handleAssignMoveCancel } from '../commands/Aggregate/Roles/assignMoveHandlers.js';
+import { handleGroupDeleteGroupSelect } from '../commands/Aggregate/Group/deleteGroupSelectHandlers.js';
+import { handleGroupDeleteConfirm, handleGroupDeleteCancel } from '../commands/Aggregate/Group/deleteConfirmHandlers.js';
 
 type AnyComponentInteraction =
     | MessageComponentInteraction
@@ -61,6 +63,7 @@ export const selectMenuHandlers: ComponentHandler[] = [
     { prefix: 'roles_demote_role:',          handler: i => handleDemoteRoleSelect(i as StringSelectMenuInteraction) },
     { prefix: 'roles_remove_char_select',   handler: i => handleRemoveCharSelect(i as StringSelectMenuInteraction) },
     { prefix: 'roles_setprog_group_select', handler: i => handleSetProgressionGroupSelect(i as StringSelectMenuInteraction) },
+    { prefix: 'group_delete_group_select', handler: i => handleGroupDeleteGroupSelect(i as StringSelectMenuInteraction) },
 ];
 
 // ── Button handlers ────────────────────────────────────────────────────────────
@@ -81,4 +84,6 @@ export const buttonHandlers: ComponentHandler[] = [
     { prefix: 'roles_edit_next:', handler: i => handleEditNext(i as ButtonInteraction) },
     { prefix: 'roles_assign_move_confirm:', handler: i => handleAssignMoveConfirm(i as ButtonInteraction) },
     { prefix: 'roles_assign_move_cancel',   handler: i => handleAssignMoveCancel(i as ButtonInteraction) },
+    { prefix: 'group_delete_confirm:', handler: i => handleGroupDeleteConfirm(i as ButtonInteraction) },
+    { prefix: 'group_delete_cancel',   handler: i => handleGroupDeleteCancel(i as ButtonInteraction) },
 ];

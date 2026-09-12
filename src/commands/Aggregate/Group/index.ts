@@ -4,6 +4,7 @@ import { execute as groupTransferOwnership } from './transferOwnership.js';
 import { execute as groupRole } from './role.js';
 import { execute as groupInfo } from './info.js';
 import { execute as groupViewMembers } from './viewMembers.js';
+import { execute as groupDelete } from './delete.js';
 
 export const data = new SlashCommandBuilder()
     .setName('group')
@@ -50,6 +51,11 @@ export const data = new SlashCommandBuilder()
         sub
             .setName('viewmembers')
             .setDescription('View a plain-text card of members by role (pick from a list if there is more than one)'),
+    )
+    .addSubcommand(sub =>
+        sub
+            .setName('delete')
+            .setDescription('Delete a group you own from KARC (does not delete its Discord roles)'),
     );
 
 export const modalSubcommands  = new Set(['create']);
@@ -62,4 +68,5 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     if (sub === 'viewroles')         return groupRole(interaction);
     if (sub === 'info')              return groupInfo(interaction);
     if (sub === 'viewmembers')       return groupViewMembers(interaction);
+    if (sub === 'delete')            return groupDelete(interaction);
 }
