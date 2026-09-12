@@ -20,7 +20,7 @@ export type GroupWithRoles = {
         color:       string | null;
         progressionsFrom: Array<{ toRoleId: string }>;
         progressionsTo:   Array<{ fromRoleId: string }>;
-        members:          Array<{ characterName: string }>;
+        members:          Array<{ character: { name: string } }>;
     }>;
 };
 
@@ -49,7 +49,7 @@ export async function renderRoleView(groupId: string, guildId: string): Promise<
                 include: {
                     progressionsFrom: { select: { toRoleId:   true } },
                     progressionsTo:   { select: { fromRoleId: true } },
-                    members:          { select: { characterName: true } },
+                    members:          { select: { character: { select: { name: true } } } },
                 },
                 orderBy: { position: 'asc' },
             },

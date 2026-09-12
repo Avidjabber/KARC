@@ -13,7 +13,7 @@ export async function handleViewMembersUpdate(interaction: ButtonInteraction): P
         where:   { codeName },
         include: {
             roles: {
-                include: { members: { select: { userId: true, characterName: true } } },
+                include: { members: { select: { userId: true, character: { select: { name: true } } } } },
                 orderBy: { position: 'asc' },
             },
         },

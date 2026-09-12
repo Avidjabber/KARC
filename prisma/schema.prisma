@@ -50,15 +50,29 @@ model GroupRoleProgression {
   @@id([fromRoleId, toRoleId])
 }
 
-model GroupRoleMember {
-  id            String    @id @default(cuid())
-  groupId       String
-  group         Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  groupRoleId   String
-  groupRole     GroupRole @relation(fields: [groupRoleId], references: [id], onDelete: Cascade)
-  userId        String
-  characterName String
-  assignedAt    DateTime  @default(now())
+model Character {
+  id          String            @id @default(cuid())
+  guildId     String
+  userId      String
+  name        String
+  bio         String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  memberships GroupRoleMember[]
 
-  @@unique([groupId, characterName, userId])
+  @@unique([guildId, userId, name])
+}
+
+model GroupRoleMember {
+  id          String    @id @default(cuid())
+  groupId     String
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupRoleId String
+  groupRole   GroupRole @relation(fields: [groupRoleId], references: [id], onDelete: Cascade)
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  userId      String
+  assignedAt  DateTime  @default(now())
+
+  @@unique([groupId, characterId])
 }

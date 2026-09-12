@@ -17,6 +17,7 @@ export async function runPromoteRoleStep(
         include: {
             group:     true,
             groupRole: { include: { progressionsFrom: { include: { toRole: true } } } },
+            character: { select: { name: true } },
         },
     });
 
@@ -28,7 +29,7 @@ export async function runPromoteRoleStep(
     const targets = member.groupRole.progressionsFrom.map(e => e.toRole);
 
     if (targets.length === 0) {
-        await reply({ flags: MessageFlags.IsComponentsV2, components: [{ type: 17, accent_color: colors.warning, components: [{ type: 10, content: `**${member.characterName}** is already at the top of their path (**${member.groupRole.name}**) in **${member.group.name}**.` }] }] } as never);
+        await reply({ flags: MessageFlags.IsComponentsV2, components: [{ type: 17, accent_color: colors.warning, components: [{ type: 10, content: `**${member.character.name}** is already at the top of their path (**${member.groupRole.name}**) in **${member.group.name}**.` }] }] } as never);
         return;
     }
 
@@ -53,7 +54,7 @@ export async function runPromoteRoleStep(
     }
 
     if (!permitted) {
-        await reply({ flags: MessageFlags.IsComponentsV2, components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: `You do not have permission to promote **${member.characterName}** in **${member.group.name}**.` }] }] } as never);
+        await reply({ flags: MessageFlags.IsComponentsV2, components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: `You do not have permission to promote **${member.character.name}** in **${member.group.name}**.` }] }] } as never);
         return;
     }
 
@@ -63,7 +64,7 @@ export async function runPromoteRoleStep(
             memberId, targets[0].id, guild,
             `promoted from ${member.groupRole.name}`, member.group.name,
         );
-        await reply({ flags: MessageFlags.IsComponentsV2, components: [{ type: 17, accent_color: colors.success, components: [{ type: 10, content: `**${member.characterName}** has been promoted from **${oldRoleName}** to **${newRoleName}** in **${member.group.name}**.` }] }] } as never);
+        await reply({ flags: MessageFlags.IsComponentsV2, components: [{ type: 17, accent_color: colors.success, components: [{ type: 10, content: `**${member.character.name}** has been promoted from **${oldRoleName}** to **${newRoleName}** in **${member.group.name}**.` }] }] } as never);
         return;
     }
 
@@ -77,7 +78,7 @@ export async function runPromoteRoleStep(
         components: [{
             type:       17,
             components: [
-                { type: 10, content: `**${member.characterName}** can advance to multiple roles from **${member.groupRole.name}**. Choose one:` },
+                { type: 10, content: `**${member.character.name}** can advance to multiple roles from **${member.groupRole.name}**. Choose one:` },
                 { type: 1,  components: [{
                     type:        3,
                     custom_id:   `roles_promote_role:${memberId}`,

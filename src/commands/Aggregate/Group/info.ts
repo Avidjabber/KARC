@@ -11,8 +11,8 @@ type GroupWithMembers = {
     ownerId:  string;
     guildId:  string;
     members:  Array<{
-        userId:        string;
-        characterName: string;
+        userId:    string;
+        character: { name: string };
         groupRole: { name: string; position: number };
     }>;
 };
@@ -49,7 +49,7 @@ export async function buildInfoComponents(guild: Guild, group: GroupWithMembers,
         for (const m of pageMembers) {
             inner.push({
                 type:    10,
-                content: `${m.groupRole.position} - **${m.groupRole.name}** : ${m.characterName}\n*${handle(m.userId)}*`,
+                content: `${m.groupRole.position} - **${m.groupRole.name}** : ${m.character.name}\n*${handle(m.userId)}*`,
             });
         }
     }
@@ -121,8 +121,8 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         where:   { codeName },
         include: {
             members: {
-                include:  { groupRole: { select: { name: true, position: true } } },
-                orderBy:  [{ groupRole: { position: 'desc' } }, { characterName: 'asc' }],
+                include:  { groupRole: { select: { name: true, position: true } }, character: { select: { name: true } } },
+                orderBy:  [{ groupRole: { position: 'desc' } }, { character: { name: 'asc' } }],
             },
         },
     });

@@ -44,7 +44,8 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
 
     const members = await db.groupRoleMember.findMany({
         where:   { groupRoleId: groupRole.id, userId: targetUser.id },
-        orderBy: { characterName: 'asc' },
+        orderBy: { character: { name: 'asc' } },
+        include: { character: { select: { name: true } } },
     });
 
     if (members.length === 0) {
@@ -84,7 +85,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
 
     // Multiple characters: show character dropdown
     if (members.length > 1) {
-        const options = members.map(m => ({ label: m.characterName, value: m.id }));
+        const options = members.map(m => ({ label: m.character.name, value: m.id }));
         await interaction.editReply({
             flags:      MessageFlags.IsComponentsV2,
             components: [{
@@ -106,6 +107,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     // Single character: go straight to confirmation
     await interaction.editReply({
         flags:      MessageFlags.IsComponentsV2,
-        components: [buildRemoveConfirmation(members[0].id, members[0].characterName, targetUser.toString(), groupRole.name, group.name)],
+        components: [buildRemoveConfirmation(members[0].id, members[0].character.name, targetUser.toString(), groupRole.name, group.name)],
     } as never);
 }

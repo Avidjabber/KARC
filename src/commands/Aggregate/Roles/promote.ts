@@ -10,7 +10,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
 
     const members = await db.groupRoleMember.findMany({
         where:   { userId: targetUser.id, group: { guildId } },
-        include: { group: true },
+        include: { group: true, character: { select: { id: true, name: true } } },
     });
 
     if (members.length === 0) {
@@ -21,15 +21,15 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         return;
     }
 
-    const charNames = [...new Set(members.map(m => m.characterName))];
+    const charIds = [...new Set(members.map(m => m.characterId))];
 
     // Multiple characters: show character select
-    if (charNames.length > 1) {
-        const options = charNames.map(name => {
-            const inGroups = members.filter(m => m.characterName === name);
+    if (charIds.length > 1) {
+        const options = charIds.map(id => {
+            const inGroups = members.filter(m => m.characterId === id);
             return {
-                label:       name,
-                value:       name,
+                label:       inGroups[0].character.name,
+                value:       id,
                 description: inGroups.length > 1
                     ? `In ${inGroups.length} groups`
                     : inGroups[0].group.name,
@@ -67,7 +67,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
             components: [{
                 type:       17,
                 components: [
-                    { type: 10, content: `**${charNames[0]}** is in multiple groups. Select one:` },
+                    { type: 10, content: `**${members[0].character.name}** is in multiple groups. Select one:` },
                     { type: 1,  components: [{
                         type:        3,
                         custom_id:   'roles_promote_group',

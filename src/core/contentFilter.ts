@@ -88,6 +88,19 @@ export function validateDisplayName(value: string): FilterResult {
     return { valid: true, value };
 }
 
+/** Bios — free-form prose. No character allowlist beyond the base checks (punctuation/newlines allowed). No profanity. Empty is valid (optional field). */
+export function validateBio(value: string): FilterResult {
+    value = value.trim();
+    if (value === '') return { valid: true, value: '' };
+
+    const base = checkBase(value);
+    if (base) return { valid: false, reason: base };
+
+    if (containsWord(value, PROFANITY)) return { valid: false, reason: 'profanity' };
+
+    return { valid: true, value };
+}
+
 /** Code names — normalised to lowercase. Must start with a letter, then letters, digits, underscores. No spaces. No profanity. */
 export function validateCodeName(value: string): FilterResult {
     value = value.trim().toLowerCase();

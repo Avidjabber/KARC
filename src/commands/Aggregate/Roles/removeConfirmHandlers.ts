@@ -10,7 +10,7 @@ export async function handleRemoveConfirm(interaction: ButtonInteraction): Promi
 
     const member = await db.groupRoleMember.findUnique({
         where:   { id: memberId },
-        include: { groupRole: true, group: true },
+        include: { groupRole: true, group: true, character: { select: { name: true } } },
     });
 
     if (!member || member.group.guildId !== guildId) {
@@ -69,7 +69,7 @@ export async function handleRemoveConfirm(interaction: ButtonInteraction): Promi
         components: [{
             type:         17,
             accent_color: colors.success,
-            components:   [{ type: 10, content: `**${member.characterName}** has been removed from **${groupRole.name}** in **${group.name}**.` }],
+            components:   [{ type: 10, content: `**${member.character.name}** has been removed from **${groupRole.name}** in **${group.name}**.` }],
         }],
     } as never);
 }

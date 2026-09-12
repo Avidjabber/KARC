@@ -12,8 +12,8 @@ export async function handleGroupInfoPage(interaction: ButtonInteraction): Promi
         where:   { id: groupId },
         include: {
             members: {
-                include:  { groupRole: { select: { name: true, position: true } } },
-                orderBy:  [{ groupRole: { position: 'desc' } }, { characterName: 'asc' }],
+                include:  { groupRole: { select: { name: true, position: true } }, character: { select: { name: true } } },
+                orderBy:  [{ groupRole: { position: 'desc' } }, { character: { name: 'asc' } }],
             },
         },
     });

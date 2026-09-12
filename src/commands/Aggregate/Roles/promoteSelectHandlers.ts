@@ -12,7 +12,7 @@ export async function handlePromoteRoleSelect(interaction: StringSelectMenuInter
 
     const member = await db.groupRoleMember.findUnique({
         where:   { id: memberId },
-        include: { groupRole: true, group: true },
+        include: { groupRole: true, group: true, character: { select: { name: true } } },
     });
 
     if (!member || member.group.guildId !== guildId) {
@@ -54,7 +54,7 @@ export async function handlePromoteRoleSelect(interaction: StringSelectMenuInter
     if (!permitted) {
         await interaction.update({
             flags:      MessageFlags.IsComponentsV2,
-            components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: `You do not have permission to promote **${member.characterName}** to **${targetRole.name}**.` }] }],
+            components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: `You do not have permission to promote **${member.character.name}** to **${targetRole.name}**.` }] }],
         } as never);
         return;
     }
@@ -69,7 +69,7 @@ export async function handlePromoteRoleSelect(interaction: StringSelectMenuInter
         components: [{
             type:         17,
             accent_color: colors.success,
-            components:   [{ type: 10, content: `**${member.characterName}** has been promoted from **${oldRoleName}** to **${newRoleName}** in **${group.name}**.` }],
+            components:   [{ type: 10, content: `**${member.character.name}** has been promoted from **${oldRoleName}** to **${newRoleName}** in **${group.name}**.` }],
         }],
     } as never);
 }

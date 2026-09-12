@@ -6,6 +6,7 @@ import { handleRoleCreateModal } from '../commands/Aggregate/Roles/createModalHa
 import { handleRoleEditModal } from '../commands/Aggregate/Roles/editModalHandlers.js';
 import { handleSetProgressionGroupSelect } from '../commands/Aggregate/Roles/setProgressionGroupSelectHandlers.js';
 import { handleAssignModal } from '../commands/Aggregate/Roles/assignModalHandlers.js';
+import { handleAssignCharSelect } from '../commands/Aggregate/Roles/assignCharSelectHandlers.js';
 import { handleCreateGroupSelect }  from '../commands/Aggregate/Roles/createGroupSelectHandlers.js';
 import { handleCreateSetManageGroup, handleCreateSetManageAssignments, handleCreateNext } from '../commands/Aggregate/Roles/createTogglesHandlers.js';
 import { handleDeleteGroupSelect }  from '../commands/Aggregate/Roles/deleteGroupSelectHandlers.js';
@@ -23,9 +24,11 @@ import { handleViewMembersUpdate, handleViewMembersPage } from '../commands/Aggr
 import { handleGroupPickPage, handleGroupPickView } from '../commands/Aggregate/Group/groupPickHandlers.js';
 import { handleRemoveCharSelect } from '../commands/Aggregate/Roles/removeCharSelectHandlers.js';
 import { handleRemoveConfirm, handleRemoveCancel } from '../commands/Aggregate/Roles/removeConfirmHandlers.js';
-import { handleAssignMoveConfirm, handleAssignMoveCancel } from '../commands/Aggregate/Roles/assignMoveHandlers.js';
 import { handleGroupDeleteGroupSelect } from '../commands/Aggregate/Group/deleteGroupSelectHandlers.js';
 import { handleGroupDeleteConfirm, handleGroupDeleteCancel } from '../commands/Aggregate/Group/deleteConfirmHandlers.js';
+import { handleCharacterCreateModal } from '../commands/Aggregate/Character/createHandlers.js';
+import { handleCharacterEditSelect, handleCharacterEditModal } from '../commands/Aggregate/Character/editHandlers.js';
+import { handleCharacterDeleteSelect, handleCharacterDeleteConfirm, handleCharacterDeleteCancel } from '../commands/Aggregate/Character/deleteHandlers.js';
 
 type AnyComponentInteraction =
     | MessageComponentInteraction
@@ -43,7 +46,9 @@ export const modalHandlers: ComponentHandler[] = [
     { prefix: 'roles_create_modal', handler: i => handleRoleCreateModal(i as ModalSubmitInteraction) },
     { prefix: 'roles_delete_modal:', handler: i => handleRoleDeleteModal(i as ModalSubmitInteraction) },
     { prefix: 'roles_edit_modal',             handler: i => handleRoleEditModal(i as ModalSubmitInteraction) },
-    { prefix: 'roles_assign_modal:',          handler: i => handleAssignModal(i as ModalSubmitInteraction) },
+    { prefix: 'roles_assign_modal_new:',      handler: i => handleAssignModal(i as ModalSubmitInteraction) },
+    { prefix: 'character_create_modal',       handler: i => handleCharacterCreateModal(i as ModalSubmitInteraction) },
+    { prefix: 'character_edit_modal:',        handler: i => handleCharacterEditModal(i as ModalSubmitInteraction) },
 ];
 
 // ── Select menu handlers ───────────────────────────────────────────────────────
@@ -64,6 +69,9 @@ export const selectMenuHandlers: ComponentHandler[] = [
     { prefix: 'roles_remove_char_select',   handler: i => handleRemoveCharSelect(i as StringSelectMenuInteraction) },
     { prefix: 'roles_setprog_group_select', handler: i => handleSetProgressionGroupSelect(i as StringSelectMenuInteraction) },
     { prefix: 'group_delete_group_select', handler: i => handleGroupDeleteGroupSelect(i as StringSelectMenuInteraction) },
+    { prefix: 'roles_assign_char_select:', handler: i => handleAssignCharSelect(i as StringSelectMenuInteraction) },
+    { prefix: 'character_edit_select', handler: i => handleCharacterEditSelect(i as StringSelectMenuInteraction) },
+    { prefix: 'character_delete_select', handler: i => handleCharacterDeleteSelect(i as StringSelectMenuInteraction) },
 ];
 
 // ── Button handlers ────────────────────────────────────────────────────────────
@@ -82,8 +90,8 @@ export const buttonHandlers: ComponentHandler[] = [
     { prefix: 'group_pick_view:', handler: i => handleGroupPickView(i as ButtonInteraction) },
     { prefix: 'roles_create_next:', handler: i => handleCreateNext(i as ButtonInteraction) },
     { prefix: 'roles_edit_next:', handler: i => handleEditNext(i as ButtonInteraction) },
-    { prefix: 'roles_assign_move_confirm:', handler: i => handleAssignMoveConfirm(i as ButtonInteraction) },
-    { prefix: 'roles_assign_move_cancel',   handler: i => handleAssignMoveCancel(i as ButtonInteraction) },
     { prefix: 'group_delete_confirm:', handler: i => handleGroupDeleteConfirm(i as ButtonInteraction) },
     { prefix: 'group_delete_cancel',   handler: i => handleGroupDeleteCancel(i as ButtonInteraction) },
+    { prefix: 'character_delete_confirm:', handler: i => handleCharacterDeleteConfirm(i as ButtonInteraction) },
+    { prefix: 'character_delete_cancel',   handler: i => handleCharacterDeleteCancel(i as ButtonInteraction) },
 ];

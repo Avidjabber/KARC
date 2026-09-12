@@ -5,14 +5,14 @@ import { runPromoteRoleStep } from './promoteFlowHelper.js';
 
 // customId: roles_promote_char:<targetUserId>
 export async function handlePromoteCharSelect(interaction: StringSelectMenuInteraction): Promise<void> {
-    const targetUserId  = interaction.customId.slice('roles_promote_char:'.length);
-    const characterName = interaction.values[0];
-    const callerId      = interaction.user.id;
-    const guildId       = interaction.guildId!;
+    const targetUserId = interaction.customId.slice('roles_promote_char:'.length);
+    const characterId  = interaction.values[0];
+    const callerId     = interaction.user.id;
+    const guildId      = interaction.guildId!;
 
     const members = await db.groupRoleMember.findMany({
-        where:   { userId: targetUserId, characterName, group: { guildId } },
-        include: { group: true },
+        where:   { userId: targetUserId, characterId, group: { guildId } },
+        include: { group: true, character: { select: { name: true } } },
     });
 
     if (members.length === 0) {
@@ -36,7 +36,7 @@ export async function handlePromoteCharSelect(interaction: StringSelectMenuInter
             components: [{
                 type:       17,
                 components: [
-                    { type: 10, content: `**${characterName}** is in multiple groups. Select one:` },
+                    { type: 10, content: `**${members[0].character.name}** is in multiple groups. Select one:` },
                     { type: 1,  components: [{
                         type:        3,
                         custom_id:   'roles_promote_group',

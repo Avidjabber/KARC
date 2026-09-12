@@ -11,7 +11,7 @@ export function fetchGroupWithMembers(groupId: string) {
         where:   { id: groupId },
         include: {
             roles: {
-                include: { members: { select: { userId: true, characterName: true } } },
+                include: { members: { select: { userId: true, character: { select: { name: true } } } } },
                 orderBy: { position: 'asc' },
             },
         },
@@ -31,7 +31,7 @@ export type GroupWithMemberRoles = {
         name:     string;
         position: number;
         subName:  string | null;
-        members:  Array<{ userId: string; characterName: string }>;
+        members:  Array<{ userId: string; character: { name: string } }>;
     }>;
 };
 
@@ -40,9 +40,9 @@ type RoleData = { header: string; contHeader: string; lines: string[] };
 function buildRoleData(group: GroupWithMemberRoles): RoleData[] {
     const sortedRoles = [...group.roles].sort((a, b) => b.position - a.position);
     return sortedRoles.map(role => {
-        const members = [...role.members].sort((a, b) => a.characterName.localeCompare(b.characterName));
+        const members = [...role.members].sort((a, b) => a.character.name.localeCompare(b.character.name));
         const lines = members.length > 0
-            ? members.map(m => `• ${m.characterName} — <@${m.userId}>`)
+            ? members.map(m => `• ${m.character.name} — <@${m.userId}>`)
             : ['*(empty)*'];
         const subNamePart = role.subName ? ` - *${role.subName}*` : '';
         return {

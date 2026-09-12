@@ -10,7 +10,7 @@ export async function handleRemoveCharSelect(interaction: StringSelectMenuIntera
 
     const member = await db.groupRoleMember.findUnique({
         where:   { id: memberId },
-        include: { groupRole: true, group: true },
+        include: { groupRole: true, group: true, character: { select: { name: true } } },
     });
 
     if (!member || member.group.guildId !== guildId) {
@@ -25,6 +25,6 @@ export async function handleRemoveCharSelect(interaction: StringSelectMenuIntera
 
     await interaction.update({
         flags:      MessageFlags.IsComponentsV2,
-        components: [buildRemoveConfirmation(memberId, member.characterName, userMention, member.groupRole.name, member.group.name)],
+        components: [buildRemoveConfirmation(memberId, member.character.name, userMention, member.groupRole.name, member.group.name)],
     } as never);
 }

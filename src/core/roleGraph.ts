@@ -22,7 +22,7 @@ export type GraphRole = {
     subName:         string | null;
     color:           string | null;
     progressionsFrom: Array<{ toRoleId: string }>;
-    members:         Array<{ characterName: string }>;
+    members:         Array<{ character: { name: string } }>;
 };
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
@@ -329,7 +329,7 @@ export function buildRoleGraphBuffer(roles: GraphRole[], groupName: string): Buf
                 const memberY = pos.y + FIRST_MEMBER_Y + i * MEMBER_STEP_H;
                 ctx.globalAlpha = 0.78;
                 ctx.fillStyle   = TEXT;
-                ctx.fillText(fitText(ctx, m.characterName, maxW), cx, memberY);
+                ctx.fillText(fitText(ctx, m.character.name, maxW), cx, memberY);
             });
             ctx.globalAlpha = 1;
         }

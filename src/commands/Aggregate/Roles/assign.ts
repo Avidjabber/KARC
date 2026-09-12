@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, MessageFlags } from 'discord.js';
 import { colors } from '../../../core/colors.js';
+import { buildCreateCharacterModal } from '../Character/create.js';
 import { db } from '../../../db/index.js';
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -58,16 +59,35 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         return;
     }
 
-    await interaction.showModal({
-        title:      `Assign: ${groupRole.name}`,
-        custom_id:  `roles_assign_modal:${groupRole.id}:${targetUser.id}`,
-        components: [
-            {
-                type:        18,
-                label:       'Character Name',
-                description: `The in-group character name for ${targetUser.displayName ?? targetUser.username}`,
-                component:   { type: 4, custom_id: 'character_name', style: 1, max_length: 200, required: true, placeholder: "Ko'har" },
-            },
-        ],
+    // Does the target already have characters set up in this server?
+    const characters = await db.character.findMany({
+        where:   { guildId, userId: targetUser.id },
+        orderBy: { name: 'asc' },
+    });
+
+    if (characters.length === 0) {
+        await interaction.showModal(buildCreateCharacterModal(`roles_assign_modal_new:${groupRole.id}:${targetUser.id}`) as never);
+        return;
+    }
+
+    const options = [
+        ...characters.map(c => ({ label: c.name, value: c.id, description: c.bio ? c.bio.slice(0, 100) : undefined })),
+        { label: '+ New Character', value: '__new__', description: `Create a new character for ${targetUser.displayName ?? targetUser.username}` },
+    ];
+
+    await interaction.reply({
+        flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+        components: [{
+            type:       17,
+            components: [
+                { type: 10, content: `Which of ${targetUser}'s characters should hold **${groupRole.name}**?` },
+                { type: 1,  components: [{
+                    type:        3,
+                    custom_id:   `roles_assign_char_select:${groupRole.id}:${targetUser.id}`,
+                    placeholder: 'Select a character',
+                    options,
+                }]},
+            ],
+        }],
     } as never);
 }
