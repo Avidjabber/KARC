@@ -38,7 +38,7 @@ async function start(): Promise<void> {
     await db.$connect();
     console.log('[startup] Database connected.');
 
-    await client.login(process.env.BOT_TOKEN);
+    await client.login(process.env.BOT_TOKEN?.trim());
 }
 
 start().catch(err => {
