@@ -16,7 +16,8 @@
     "db:generate": "prisma generate",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:seed-lookups": "tsx scripts/seedLookups.ts"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.9",

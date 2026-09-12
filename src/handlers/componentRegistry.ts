@@ -25,8 +25,22 @@ import { handleRemoveCharSelect } from '../commands/Aggregate/Roles/removeCharSe
 import { handleRemoveConfirm, handleRemoveCancel } from '../commands/Aggregate/Roles/removeConfirmHandlers.js';
 import { handleGroupDeleteGroupSelect } from '../commands/Aggregate/Group/deleteGroupSelectHandlers.js';
 import { handleGroupDeleteConfirm, handleGroupDeleteCancel } from '../commands/Aggregate/Group/deleteConfirmHandlers.js';
-import { handleCharacterCreateModal } from '../commands/Aggregate/Character/createHandlers.js';
-import { handleCharacterEditSelect, handleCharacterEditModal } from '../commands/Aggregate/Character/editHandlers.js';
+import {
+    handleCharacterEditSelect,
+    handleEditPanelNameButton,
+    handleEditPanelBioButton,
+    handleEditPanelBack,
+    handleEditPanelDone,
+    handleEditNameModal,
+    handleEditBioModal,
+} from '../commands/Aggregate/Character/editHandlers.js';
+import { handleEditPanelCareerButton, handleEditPanelCareerSelect } from '../commands/Aggregate/Character/editCareerHandlers.js';
+import {
+    handleEditPanelResidenceButton,
+    handleEditPanelResidencePage,
+    handleEditPanelResidenceSelect,
+    handleEditPanelResidenceClear,
+} from '../commands/Aggregate/Character/editResidenceHandlers.js';
 import { handleCharacterDeleteSelect, handleCharacterDeleteConfirm, handleCharacterDeleteCancel } from '../commands/Aggregate/Character/deleteHandlers.js';
 
 type AnyComponentInteraction =
@@ -45,8 +59,8 @@ export const modalHandlers: ComponentHandler[] = [
     { prefix: 'roles_create_modal', handler: i => handleRoleCreateModal(i as ModalSubmitInteraction) },
     { prefix: 'roles_delete_modal:', handler: i => handleRoleDeleteModal(i as ModalSubmitInteraction) },
     { prefix: 'roles_edit_modal',             handler: i => handleRoleEditModal(i as ModalSubmitInteraction) },
-    { prefix: 'character_create_modal',       handler: i => handleCharacterCreateModal(i as ModalSubmitInteraction) },
-    { prefix: 'character_edit_modal:',        handler: i => handleCharacterEditModal(i as ModalSubmitInteraction) },
+    { prefix: 'character_editpanel_name_modal:', handler: i => handleEditNameModal(i as ModalSubmitInteraction) },
+    { prefix: 'character_editpanel_bio_modal:',  handler: i => handleEditBioModal(i as ModalSubmitInteraction) },
 ];
 
 // ── Select menu handlers ───────────────────────────────────────────────────────
@@ -70,6 +84,7 @@ export const selectMenuHandlers: ComponentHandler[] = [
     { prefix: 'roles_assign_char_select:', handler: i => handleAssignCharSelect(i as StringSelectMenuInteraction) },
     { prefix: 'character_edit_select', handler: i => handleCharacterEditSelect(i as StringSelectMenuInteraction) },
     { prefix: 'character_delete_select', handler: i => handleCharacterDeleteSelect(i as StringSelectMenuInteraction) },
+    { prefix: 'character_editpanel_career_select:', handler: i => handleEditPanelCareerSelect(i as StringSelectMenuInteraction) },
 ];
 
 // ── Button handlers ────────────────────────────────────────────────────────────
@@ -92,4 +107,13 @@ export const buttonHandlers: ComponentHandler[] = [
     { prefix: 'group_delete_cancel',   handler: i => handleGroupDeleteCancel(i as ButtonInteraction) },
     { prefix: 'character_delete_confirm:', handler: i => handleCharacterDeleteConfirm(i as ButtonInteraction) },
     { prefix: 'character_delete_cancel',   handler: i => handleCharacterDeleteCancel(i as ButtonInteraction) },
+    { prefix: 'character_editpanel_name:', handler: i => handleEditPanelNameButton(i as ButtonInteraction) },
+    { prefix: 'character_editpanel_bio:', handler: i => handleEditPanelBioButton(i as ButtonInteraction) },
+    { prefix: 'character_editpanel_career:', handler: i => handleEditPanelCareerButton(i as ButtonInteraction) },
+    { prefix: 'character_editpanel_residence:', handler: i => handleEditPanelResidenceButton(i as ButtonInteraction) },
+    { prefix: 'character_editpanel_residence_page:', handler: i => handleEditPanelResidencePage(i as ButtonInteraction) },
+    { prefix: 'character_editpanel_residence_select:', handler: i => handleEditPanelResidenceSelect(i as ButtonInteraction) },
+    { prefix: 'character_editpanel_residence_clear:', handler: i => handleEditPanelResidenceClear(i as ButtonInteraction) },
+    { prefix: 'character_editpanel_back:', handler: i => handleEditPanelBack(i as ButtonInteraction) },
+    { prefix: 'character_editpanel_done:', handler: i => handleEditPanelDone(i as ButtonInteraction) },
 ];

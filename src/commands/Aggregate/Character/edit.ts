@@ -2,26 +2,8 @@ import { ChatInputCommandInteraction, MessageFlags } from 'discord.js';
 import { colors } from '../../../core/colors.js';
 import { isServerAdmin } from '../../../core/permissions.js';
 import { db } from '../../../db/index.js';
-
-export function buildEditCharacterModal(character: { id: string; name: string; bio: string | null }): object {
-    return {
-        title:      'Edit Character',
-        custom_id:  `character_edit_modal:${character.id}`,
-        components: [
-            {
-                type:      18,
-                label:     'Name',
-                component: { type: 4, custom_id: 'name', style: 1, max_length: 200, required: true, placeholder: "Ko'har", value: character.name },
-            },
-            {
-                type:        18,
-                label:       'Bio',
-                description: 'Optional — a small bio or other details',
-                component:   { type: 4, custom_id: 'bio', style: 2, max_length: 1000, required: false, placeholder: 'A short description of your character...', value: character.bio ?? '' },
-            },
-        ],
-    };
-}
+import { buildEditPanelComponents } from './editPanel.js';
+import { startEditSession } from './editShared.js';
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
     const guildId    = interaction.guildId!;
@@ -40,6 +22,10 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     const characters = await db.character.findMany({
         where:   { guildId, userId: targetUser.id },
         orderBy: { name: 'asc' },
+        include: {
+            career:    { select: { id: true, value: true } },
+            residence: { select: { id: true, value: true } },
+        },
     });
 
     if (characters.length === 0) {
@@ -54,7 +40,11 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     }
 
     if (characters.length === 1) {
-        await interaction.showModal(buildEditCharacterModal(characters[0]) as never);
+        const { sessionId, session } = startEditSession(characters[0]);
+        await interaction.reply({
+            flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+            components: buildEditPanelComponents({ sessionId, ...session.draft }),
+        } as never);
         return;
     }
 

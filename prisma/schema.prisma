@@ -56,11 +56,27 @@ model Character {
   userId      String
   name        String
   bio         String?
+  residenceId String?
+  residence   Residence?        @relation(fields: [residenceId], references: [id], onDelete: SetNull)
+  careerId    String?
+  career      Career?           @relation(fields: [careerId], references: [id], onDelete: SetNull)
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   memberships GroupRoleMember[]
 
   @@unique([guildId, userId, name])
+}
+
+model Residence {
+  id         String      @id @default(cuid())
+  value      String      @unique
+  characters Character[]
+}
+
+model Career {
+  id         String      @id @default(cuid())
+  value      String      @unique
+  characters Character[]
 }
 
 model GroupRoleMember {
