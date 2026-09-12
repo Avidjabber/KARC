@@ -5,7 +5,6 @@ import { handleGroupInfoPage, handleGroupInfoStats, handleGroupInfoDone } from '
 import { handleRoleCreateModal } from '../commands/Aggregate/Roles/createModalHandlers.js';
 import { handleRoleEditModal } from '../commands/Aggregate/Roles/editModalHandlers.js';
 import { handleSetProgressionGroupSelect } from '../commands/Aggregate/Roles/setProgressionGroupSelectHandlers.js';
-import { handleAssignModal } from '../commands/Aggregate/Roles/assignModalHandlers.js';
 import { handleAssignCharSelect } from '../commands/Aggregate/Roles/assignCharSelectHandlers.js';
 import { handleCreateGroupSelect }  from '../commands/Aggregate/Roles/createGroupSelectHandlers.js';
 import { handleCreateSetManageGroup, handleCreateSetManageAssignments, handleCreateNext } from '../commands/Aggregate/Roles/createTogglesHandlers.js';
@@ -46,7 +45,6 @@ export const modalHandlers: ComponentHandler[] = [
     { prefix: 'roles_create_modal', handler: i => handleRoleCreateModal(i as ModalSubmitInteraction) },
     { prefix: 'roles_delete_modal:', handler: i => handleRoleDeleteModal(i as ModalSubmitInteraction) },
     { prefix: 'roles_edit_modal',             handler: i => handleRoleEditModal(i as ModalSubmitInteraction) },
-    { prefix: 'roles_assign_modal_new:',      handler: i => handleAssignModal(i as ModalSubmitInteraction) },
     { prefix: 'character_create_modal',       handler: i => handleCharacterCreateModal(i as ModalSubmitInteraction) },
     { prefix: 'character_edit_modal:',        handler: i => handleCharacterEditModal(i as ModalSubmitInteraction) },
 ];

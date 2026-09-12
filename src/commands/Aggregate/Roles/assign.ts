@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction, MessageFlags } from 'discord.js';
 import { colors } from '../../../core/colors.js';
-import { buildCreateCharacterModal } from '../Character/create.js';
 import { db } from '../../../db/index.js';
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -66,14 +65,14 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     });
 
     if (characters.length === 0) {
-        await interaction.showModal(buildCreateCharacterModal(`roles_assign_modal_new:${groupRole.id}:${targetUser.id}`) as never);
+        await interaction.reply({
+            flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+            components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: `${targetUser} does not have any characters in this server yet. They'll need to run \`/character create\` first.` }] }],
+        } as never);
         return;
     }
 
-    const options = [
-        ...characters.map(c => ({ label: c.name, value: c.id, description: c.bio ? c.bio.slice(0, 100) : undefined })),
-        { label: '+ New Character', value: '__new__', description: `Create a new character for ${targetUser.displayName ?? targetUser.username}` },
-    ];
+    const options = characters.map(c => ({ label: c.name, value: c.id, description: c.bio ? c.bio.slice(0, 100) : undefined }));
 
     await interaction.reply({
         flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,

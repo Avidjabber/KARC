@@ -1,6 +1,5 @@
 import { MessageFlags, StringSelectMenuInteraction } from 'discord.js';
 import { colors } from '../../../core/colors.js';
-import { buildCreateCharacterModal } from '../Character/create.js';
 import { db } from '../../../db/index.js';
 import { linkCharacterToRole } from './assignLinkHelper.js';
 
@@ -22,10 +21,10 @@ async function checkAssignPermission(groupId: string, groupRolePosition: number,
     return !!(assignerMembership && assignerMembership.groupRole.position >= groupRolePosition);
 }
 
-// customId: roles_assign_char_select:<groupRoleId>:<targetUserId>  (characterId or '__new__' from values[0])
+// customId: roles_assign_char_select:<groupRoleId>:<targetUserId>  (characterId from values[0])
 export async function handleAssignCharSelect(interaction: StringSelectMenuInteraction): Promise<void> {
     const [, groupRoleId, targetUserId] = interaction.customId.split(':');
-    const choice      = interaction.values[0];
+    const characterId = interaction.values[0];
     const assignerId  = interaction.user.id;
     const guildId     = interaction.guildId!;
 
@@ -38,11 +37,6 @@ export async function handleAssignCharSelect(interaction: StringSelectMenuIntera
         return;
     }
 
-    if (choice === '__new__') {
-        await interaction.showModal(buildCreateCharacterModal(`roles_assign_modal_new:${groupRoleId}:${targetUserId}`) as never);
-        return;
-    }
-
     const permitted = await checkAssignPermission(groupRole.groupId, groupRole.position, assignerId);
     if (!permitted) {
         await interaction.update({
@@ -52,7 +46,7 @@ export async function handleAssignCharSelect(interaction: StringSelectMenuIntera
         return;
     }
 
-    const character = await db.character.findUnique({ where: { id: choice } });
+    const character = await db.character.findUnique({ where: { id: characterId } });
     if (!character || character.guildId !== guildId || character.userId !== targetUserId) {
         await interaction.update({
             flags:      MessageFlags.IsComponentsV2,
