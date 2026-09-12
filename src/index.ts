@@ -40,6 +40,10 @@ async function start(): Promise<void> {
 
     const token = process.env.BOT_TOKEN?.trim();
     console.log(`[startup] BOT_TOKEN length: ${token?.length ?? 'undefined'}`);
+    console.log(`[startup] CLIENT_ID: ${process.env.CLIENT_ID ?? 'undefined'}`);
+    console.log(`[startup] GUILD_ID: ${process.env.GUILD_ID ?? 'undefined'}`);
+    console.log(`[startup] NODE_ENV: ${process.env.NODE_ENV ?? 'undefined'}`);
+    console.log(`[startup] env keys containing "TOKEN": ${Object.keys(process.env).filter(k => k.includes('TOKEN')).join(', ') || '(none)'}`);
     await client.login(token);
 }
 
