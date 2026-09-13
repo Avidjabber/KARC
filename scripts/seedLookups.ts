@@ -9,6 +9,8 @@ const CAREERS = [
     'Prospector',
     'Smith',
     'Enchanter',
+    'Hunter',
+    'Warrior',
 ];
 
 const RESIDENCES = [
