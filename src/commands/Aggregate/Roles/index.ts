@@ -109,7 +109,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommand(sub =>
         sub
             .setName('sync')
-            .setDescription('Sync your groups\' roles with their linked Discord roles (name, color, members)'),
+            .setDescription('Sync group, career, and residence tags with their linked Discord roles'),
     );
 
 export const modalSubcommands = new Set(['create', 'edit', 'assign', 'delete']);

@@ -37,12 +37,41 @@ export async function handleGroupCreateModal(interaction: ModalSubmitInteraction
         return;
     }
 
+    // Find an existing Discord role by name, or create one — this is the group-wide tag
+    // applied to every member on top of their specific role tag.
+    const guild = interaction.guild!;
+    let discordRoleId: string;
+    let synced = false;
+    try {
+        await guild.roles.fetch();
+        const existing = guild.roles.cache.find(r => r.name === name);
+        if (existing) {
+            discordRoleId = existing.id;
+            synced        = true;
+        } else {
+            const created = await guild.roles.create({
+                name,
+                reason: `KARC: group tag created for "${name}"`,
+            });
+            discordRoleId = created.id;
+        }
+    } catch (err) {
+        console.error('[handleGroupCreateModal] Discord role error:', err);
+        await interaction.reply({
+            flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+            components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: 'Failed to set up the Discord group tag. Make sure the bot has Manage Roles permission.' }] }],
+        } as never);
+        return;
+    }
+
     let group;
     try {
         group = await db.group.create({
-            data: { codeName, name, ownerId: userId, guildId },
+            data: { codeName, name, ownerId: userId, guildId, discordRoleId },
         });
     } catch (err) {
+        if (!synced) await guild.roles.delete(discordRoleId, 'KARC: rolling back after DB error').catch(() => null);
+
         const isPrismaUnique = (err as { code?: string }).code === 'P2002';
         const content = isPrismaUnique
             ? `A group with code name \`${codeName}\` already exists.`
@@ -56,12 +85,13 @@ export async function handleGroupCreateModal(interaction: ModalSubmitInteraction
         return;
     }
 
+    const note = synced ? '\n-# An existing Discord role with this name was found and linked as the group tag.' : '';
     await interaction.reply({
         flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
         components: [{
             type:         17,
             accent_color: colors.success,
-            components:   [{ type: 10, content: `## Group Created\n**${group.name}** (\`${group.codeName}\`) has been created.` }],
+            components:   [{ type: 10, content: `## Group Created\n**${group.name}** (\`${group.codeName}\`) has been created.${note}` }],
         }],
     } as never);
 }

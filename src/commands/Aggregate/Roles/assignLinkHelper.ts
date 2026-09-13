@@ -10,7 +10,7 @@ export type LinkOutcome =
 export async function linkCharacterToRole(
     character: { id: string; name: string; userId: string },
     groupRole: { id: string; name: string; discordRoleId: string | null },
-    group: { id: string; name: string },
+    group: { id: string; name: string; discordRoleId: string | null },
     guild: Guild,
 ): Promise<LinkOutcome> {
     const existing = await db.groupRoleMember.findUnique({
@@ -47,6 +47,17 @@ export async function linkCharacterToRole(
             await member.roles.add(groupRole.discordRoleId, `KARC: assigned to ${groupRole.name} in ${group.name}`);
         } catch (err) {
             console.error('[linkCharacterToRole] Discord role add failed:', err);
+        }
+    }
+
+    // The group's own tag is applied alongside the specific role tag whenever a character
+    // newly joins the group. A "moved" outcome stays within the same group, so it already holds it.
+    if (outcome.kind === 'created' && group.discordRoleId) {
+        try {
+            const member = await guild.members.fetch(character.userId);
+            await member.roles.add(group.discordRoleId, `KARC: joined ${group.name}`);
+        } catch (err) {
+            console.error('[linkCharacterToRole] Discord group tag add failed:', err);
         }
     }
 

@@ -30,6 +30,9 @@ export type EditSession = {
     userId:      string;
     characterId: string | null; // null while creating; the real row's id once one exists
     draft:       CharacterDraft;
+    // Career/residence as they were before this session started — untouched by draft edits, so
+    // saving can tell what changed and reconcile Discord tags accordingly.
+    original:    { career: CharacterDraft['career']; residence: CharacterDraft['residence'] };
 };
 
 // sessionId → in-progress session (create or edit). In-memory only; lost on bot restart, which just
@@ -44,6 +47,7 @@ export function createNewSession(guildId: string, userId: string): { sessionId: 
         userId,
         characterId: null,
         draft:       { name: '', bio: null, career: null, residence: null },
+        original:    { career: null, residence: null },
     };
     sessions.set(sessionId, session);
     return { sessionId, session };
@@ -62,6 +66,7 @@ export function startEditSession(character: CharacterWithLookups): { sessionId: 
             career:    character.career,
             residence: character.residence,
         },
+        original: { career: character.career, residence: character.residence },
     };
     sessions.set(sessionId, session);
     return { sessionId, session };

@@ -3,6 +3,7 @@ import { colors } from '../../../core/colors.js';
 import { validateDisplayName, validateBio, FILTER_MESSAGES } from '../../../core/contentFilter.js';
 import { extractField } from '../../../core/modalUtils.js';
 import { db } from '../../../db/index.js';
+import { syncCharacterLookupTags } from './lookupTagSync.js';
 import { buildEditNameModal, buildEditBioModal } from './editPanel.js';
 import { clearSession, loadAuthorizedCharacter, loadAuthorizedSession, renderPanel, startEditSession } from './editShared.js';
 
@@ -104,6 +105,17 @@ export async function handleEditPanelDone(interaction: ButtonInteraction): Promi
             components: buildErrorWithBack(content, sessionId),
         } as never);
         return;
+    }
+
+    // Best-effort — the character record is already saved either way.
+    try {
+        await syncCharacterLookupTags(
+            interaction.guild!, session.guildId, session.userId,
+            session.original,
+            { career: session.draft.career, residence: session.draft.residence },
+        );
+    } catch (err) {
+        console.error('[handleEditPanelDone] lookup tag sync failed:', err);
     }
 
     clearSession(sessionId);

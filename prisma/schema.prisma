@@ -10,15 +10,16 @@ datasource db {
 // ── Add models below ──────────────────────────────────────────────────────────
 
 model Group {
-  id        String            @id @default(cuid())
-  codeName  String            @unique
-  name      String
-  ownerId   String
-  guildId   String
-  roles     GroupRole[]
-  members   GroupRoleMember[]
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  id            String            @id @default(cuid())
+  codeName      String            @unique
+  name          String
+  ownerId       String
+  guildId       String
+  discordRoleId String?
+  roles         GroupRole[]
+  members       GroupRoleMember[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 }
 
 model GroupRole {
@@ -68,15 +69,41 @@ model Character {
 }
 
 model Residence {
-  id         String      @id @default(cuid())
-  value      String      @unique
+  id         String          @id @default(cuid())
+  value      String          @unique
   characters Character[]
+  roles      ResidenceRole[]
+}
+
+model ResidenceRole {
+  id            String    @id @default(cuid())
+  guildId       String
+  residenceId   String
+  residence     Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  discordRoleId String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([guildId, residenceId])
 }
 
 model Career {
-  id         String      @id @default(cuid())
-  value      String      @unique
+  id         String       @id @default(cuid())
+  value      String       @unique
   characters Character[]
+  roles      CareerRole[]
+}
+
+model CareerRole {
+  id            String   @id @default(cuid())
+  guildId       String
+  careerId      String
+  career        Career   @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  discordRoleId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([guildId, careerId])
 }
 
 model GroupRoleMember {

@@ -52,13 +52,22 @@ export async function handleRemoveConfirm(interaction: ButtonInteraction): Promi
 
     await db.groupRoleMember.delete({ where: { id: memberId } });
 
-    if (groupRole.discordRoleId) {
+    if (groupRole.discordRoleId || group.discordRoleId) {
         try {
             const discordMember = await interaction.guild!.members.fetch(member.userId);
-            await discordMember.roles.remove(
-                groupRole.discordRoleId,
-                `KARC: removed from ${groupRole.name} in ${group.name}`,
-            );
+            if (groupRole.discordRoleId) {
+                await discordMember.roles.remove(
+                    groupRole.discordRoleId,
+                    `KARC: removed from ${groupRole.name} in ${group.name}`,
+                );
+            }
+            // A member holds at most one role per group, so losing this role means leaving the group entirely.
+            if (group.discordRoleId) {
+                await discordMember.roles.remove(
+                    group.discordRoleId,
+                    `KARC: left ${group.name}`,
+                );
+            }
         } catch (err) {
             console.error('[roles remove confirm] Discord role remove failed:', err);
         }

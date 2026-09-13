@@ -2,6 +2,7 @@ import { ButtonInteraction, MessageFlags, StringSelectMenuInteraction } from 'di
 import { colors } from '../../../core/colors.js';
 import { db } from '../../../db/index.js';
 import { buildDeleteConfirmation } from './delete.js';
+import { syncCharacterLookupTags } from './lookupTagSync.js';
 
 // customId: character_delete_select
 export async function handleCharacterDeleteSelect(interaction: StringSelectMenuInteraction): Promise<void> {
@@ -44,6 +45,8 @@ export async function handleCharacterDeleteConfirm(interaction: ButtonInteractio
     const character = await db.character.findUnique({
         where:   { id: characterId },
         include: {
+            career:    { select: { id: true, value: true } },
+            residence: { select: { id: true, value: true } },
             memberships: {
                 include: {
                     group:     true,
@@ -76,6 +79,17 @@ export async function handleCharacterDeleteConfirm(interaction: ButtonInteractio
 
     // Cascades to GroupRoleMember rows for this character.
     await db.character.delete({ where: { id: characterId } });
+
+    // Best-effort — drop Career/Residence tags no other character of theirs still carries.
+    try {
+        await syncCharacterLookupTags(
+            interaction.guild!, guildId, userId,
+            { career: character.career, residence: character.residence },
+            { career: null, residence: null },
+        );
+    } catch (err) {
+        console.error('[character delete confirm] lookup tag sync failed:', err);
+    }
 
     await interaction.update({
         flags:      MessageFlags.IsComponentsV2,
