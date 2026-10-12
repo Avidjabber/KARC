@@ -4,6 +4,7 @@ import { execute as characterEdit } from './edit.js';
 import { execute as characterList } from './list.js';
 import { execute as characterDelete } from './delete.js';
 import { execute as characterInfo } from './info.js';
+import { execute as characterPurge } from './purge.js';
 
 export const data = new SlashCommandBuilder()
     .setName('character')
@@ -44,6 +45,17 @@ export const data = new SlashCommandBuilder()
                     .setDescription("View this member's character instead of your own")
                     .setRequired(false),
             ),
+    )
+    .addSubcommand(sub =>
+        sub
+            .setName('purge')
+            .setDescription('Delete ALL of a member\'s characters, by user ID (requires Administrator)')
+            .addStringOption(opt =>
+                opt
+                    .setName('userid')
+                    .setDescription('The Discord user ID whose characters to delete (works even if they left the server)')
+                    .setRequired(true),
+            ),
     );
 
 export const modalSubcommands  = new Set(['create', 'edit']);
@@ -56,4 +68,5 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     if (sub === 'list')   return characterList(interaction);
     if (sub === 'delete') return characterDelete(interaction);
     if (sub === 'info')   return characterInfo(interaction);
+    if (sub === 'purge')  return characterPurge(interaction);
 }

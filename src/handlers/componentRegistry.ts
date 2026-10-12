@@ -43,6 +43,7 @@ import {
 } from '../commands/Aggregate/Character/editResidenceHandlers.js';
 import { handleCharacterDeleteSelect, handleCharacterDeleteConfirm, handleCharacterDeleteCancel } from '../commands/Aggregate/Character/deleteHandlers.js';
 import { handleCharacterInfoSelect } from '../commands/Aggregate/Character/infoHandlers.js';
+import { handlePurgeConfirm, handlePurgeCancel } from '../commands/Aggregate/Character/purgeHandlers.js';
 
 type AnyComponentInteraction =
     | MessageComponentInteraction
@@ -109,6 +110,8 @@ export const buttonHandlers: ComponentHandler[] = [
     { prefix: 'group_delete_cancel',   handler: i => handleGroupDeleteCancel(i as ButtonInteraction) },
     { prefix: 'character_delete_confirm:', handler: i => handleCharacterDeleteConfirm(i as ButtonInteraction) },
     { prefix: 'character_delete_cancel',   handler: i => handleCharacterDeleteCancel(i as ButtonInteraction) },
+    { prefix: 'character_purge_confirm:', handler: i => handlePurgeConfirm(i as ButtonInteraction) },
+    { prefix: 'character_purge_cancel',   handler: i => handlePurgeCancel(i as ButtonInteraction) },
     { prefix: 'character_editpanel_name:', handler: i => handleEditPanelNameButton(i as ButtonInteraction) },
     { prefix: 'character_editpanel_bio:', handler: i => handleEditPanelBioButton(i as ButtonInteraction) },
     { prefix: 'character_editpanel_career:', handler: i => handleEditPanelCareerButton(i as ButtonInteraction) },

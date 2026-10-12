@@ -3,6 +3,7 @@ import { client } from './core/client.js';
 import interactionCreate from './events/interactionCreate.js';
 import onReady from './events/onReady.js';
 import onGuildCreate from './events/onGuildCreate.js';
+import onGuildMemberRemove from './events/onGuildMemberRemove.js';
 import { db } from './db/index.js';
 
 // ── Timestamps on all console output ──────────────────────────────────────────
@@ -22,6 +23,10 @@ client.once('clientReady', () => {
 
 client.on('guildCreate', guild =>
     onGuildCreate(guild).catch(err => console.error('Error in onGuildCreate:', err)),
+);
+
+client.on('guildMemberRemove', member =>
+    onGuildMemberRemove(member).catch(err => console.error('Error in onGuildMemberRemove:', err)),
 );
 
 client.on('interactionCreate', async interaction => {

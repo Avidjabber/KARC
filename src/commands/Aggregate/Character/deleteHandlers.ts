@@ -64,16 +64,28 @@ export async function handleCharacterDeleteConfirm(interaction: ButtonInteractio
         return;
     }
 
-    for (const membership of character.memberships) {
-        if (!membership.groupRole.discordRoleId) continue;
-        try {
-            const discordMember = await interaction.guild!.members.fetch(character.userId);
-            await discordMember.roles.remove(
-                membership.groupRole.discordRoleId,
-                `KARC: character ${character.name} deleted`,
-            );
-        } catch (err) {
-            console.error('[character delete confirm] Discord role remove failed:', err);
+    if (character.memberships.length > 0) {
+        const discordMember = await interaction.guild!.members.fetch(character.userId).catch(() => null);
+        if (discordMember) {
+            for (const membership of character.memberships) {
+                try {
+                    if (membership.groupRole.discordRoleId) {
+                        await discordMember.roles.remove(
+                            membership.groupRole.discordRoleId,
+                            `KARC: character ${character.name} deleted`,
+                        );
+                    }
+                    // A member holds at most one role per group, so losing this role means leaving the group entirely.
+                    if (membership.group.discordRoleId) {
+                        await discordMember.roles.remove(
+                            membership.group.discordRoleId,
+                            `KARC: character ${character.name} deleted`,
+                        );
+                    }
+                } catch (err) {
+                    console.error('[character delete confirm] Discord role remove failed:', err);
+                }
+            }
         }
     }
 
