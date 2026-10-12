@@ -58,8 +58,10 @@ export const data = new SlashCommandBuilder()
             .setDescription('Delete a group you own from KARC (does not delete its Discord roles)'),
     );
 
-export const modalSubcommands  = new Set(['create']);
-export const publicSubcommands = new Set(['viewroles', 'viewmembers']);
+export const modalSubcommands     = new Set(['create']);
+// These are public when they have something to show, but reply ephemerally when there's
+// nothing to show (e.g. no groups exist) — so they manage their own first reply.
+export const manualAckSubcommands = new Set(['viewroles', 'viewmembers']);
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
     const sub = interaction.options.getSubcommand();

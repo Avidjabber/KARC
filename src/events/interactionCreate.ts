@@ -51,8 +51,9 @@ export default async function interactionCreate(
         const subcommandName = interaction.options.getSubcommand(false);
         const subUsesModal   = subcommandName && command.modalSubcommands?.has(subcommandName);
         const subIsPublic    = subcommandName && command.publicSubcommands?.has(subcommandName);
+        const subManualAck   = subcommandName && command.manualAckSubcommands?.has(subcommandName);
 
-        if (!command.usesModal && !subUsesModal) {
+        if (!command.usesModal && !subUsesModal && !subManualAck) {
             const deferContainer = new ContainerBuilder()
                 .addTextDisplayComponents(
                     new TextDisplayBuilder().setContent('-# Loading...'),

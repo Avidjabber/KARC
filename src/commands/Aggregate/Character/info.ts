@@ -54,6 +54,9 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     const targetUser = interaction.options.getUser('user') ?? interaction.user;
     const isSelf     = targetUser.id === interaction.user.id;
 
+    // This command is public when there's a character to show, but replies ephemerally when
+    // there isn't — so unlike most commands it issues its own first reply (not auto-deferred),
+    // since Discord fixes ephemeral-vs-public at that first reply and an editReply can't change it.
     const characters = await db.character.findMany({
         where:   { guildId, userId: targetUser.id },
         orderBy: { name: 'asc' },
@@ -64,15 +67,15 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         const content = isSelf
             ? 'You do not have any characters in this server yet.'
             : `${targetUser} does not have any characters in this server.`;
-        await interaction.editReply({
-            flags:      MessageFlags.IsComponentsV2,
+        await interaction.reply({
+            flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
             components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content }] }],
         } as never);
         return;
     }
 
     if (characters.length === 1) {
-        await interaction.editReply({
+        await interaction.reply({
             flags:      MessageFlags.IsComponentsV2,
             components: buildInfoCardComponents(characters[0]),
         } as never);
@@ -85,7 +88,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         description: c.career ? c.career.value : undefined,
     }));
 
-    await interaction.editReply({
+    await interaction.reply({
         flags:      MessageFlags.IsComponentsV2,
         components: [{
             type:       17,

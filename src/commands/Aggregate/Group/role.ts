@@ -67,6 +67,29 @@ export async function renderRoleView(groupId: string, guildId: string): Promise<
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
     const guildId = interaction.guildId!;
 
+    // This command is public when there's something to show, but replies ephemerally when
+    // there isn't — so unlike most commands it issues its own first reply (not auto-deferred),
+    // since Discord fixes ephemeral-vs-public at that first reply and an editReply can't change it.
+    const groups = await db.group.findMany({
+        where:   { guildId },
+        select:  { id: true, codeName: true, name: true },
+        orderBy: { name: 'asc' },
+    });
+
+    if (groups.length === 0) {
+        await interaction.reply({
+            flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+            components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: 'No groups exist in this server.' }] }],
+        } as never);
+        return;
+    }
+
+    // Public — acknowledge immediately with a placeholder, then edit in the real result once ready.
+    await interaction.reply({
+        flags:      MessageFlags.IsComponentsV2,
+        components: [{ type: 17, components: [{ type: 10, content: '-# Loading...' }] }],
+    } as never);
+
     // Delete the previous viewroles post in this channel so it doesn't fill up
     const prev = activeMessages.get(interaction.channelId);
     if (prev) {
@@ -78,20 +101,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
             }
         } catch { /* already deleted or no permission — ignore */ }
         activeMessages.delete(interaction.channelId);
-    }
-
-    const groups = await db.group.findMany({
-        where:   { guildId },
-        select:  { id: true, codeName: true, name: true },
-        orderBy: { name: 'asc' },
-    });
-
-    if (groups.length === 0) {
-        await interaction.editReply({
-            flags:      MessageFlags.IsComponentsV2,
-            components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: 'No groups exist in this server.' }] }],
-        } as never);
-        return;
     }
 
     if (groups.length === 1) {
