@@ -21,6 +21,7 @@ import { handleDemoteRoleSelect }  from '../commands/Aggregate/Roles/demoteConfi
 import { handleViewRolesUpdate } from '../commands/Aggregate/Group/roleUpdateHandlers.js';
 import { handleViewMembersUpdate, handleViewMembersPage } from '../commands/Aggregate/Group/viewMembersUpdateHandlers.js';
 import { handleGroupPickPage, handleGroupPickView } from '../commands/Aggregate/Group/groupPickHandlers.js';
+import { handleGroupListPage, handleGroupListInfo } from '../commands/Aggregate/Group/listHandlers.js';
 import { handleRemoveCharSelect } from '../commands/Aggregate/Roles/removeCharSelectHandlers.js';
 import { handleRemoveConfirm, handleRemoveCancel } from '../commands/Aggregate/Roles/removeConfirmHandlers.js';
 import { handleGroupDeleteGroupSelect } from '../commands/Aggregate/Group/deleteGroupSelectHandlers.js';
@@ -104,6 +105,8 @@ export const buttonHandlers: ComponentHandler[] = [
     { prefix: 'roles_remove_cancel',    handler: i => handleRemoveCancel(i as ButtonInteraction) },
     { prefix: 'group_pick_page:', handler: i => handleGroupPickPage(i as ButtonInteraction) },
     { prefix: 'group_pick_view:', handler: i => handleGroupPickView(i as ButtonInteraction) },
+    { prefix: 'group_list_page:', handler: i => handleGroupListPage(i as ButtonInteraction) },
+    { prefix: 'group_list_info:', handler: i => handleGroupListInfo(i as ButtonInteraction) },
     { prefix: 'roles_create_next:', handler: i => handleCreateNext(i as ButtonInteraction) },
     { prefix: 'roles_edit_next:', handler: i => handleEditNext(i as ButtonInteraction) },
     { prefix: 'group_delete_confirm:', handler: i => handleGroupDeleteConfirm(i as ButtonInteraction) },

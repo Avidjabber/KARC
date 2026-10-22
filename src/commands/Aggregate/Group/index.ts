@@ -5,6 +5,7 @@ import { execute as groupRole } from './role.js';
 import { execute as groupInfo } from './info.js';
 import { execute as groupViewMembers } from './viewMembers.js';
 import { execute as groupDelete } from './delete.js';
+import { execute as groupList } from './list.js';
 
 export const data = new SlashCommandBuilder()
     .setName('group')
@@ -54,6 +55,11 @@ export const data = new SlashCommandBuilder()
     )
     .addSubcommand(sub =>
         sub
+            .setName('list')
+            .setDescription('List all groups in this server'),
+    )
+    .addSubcommand(sub =>
+        sub
             .setName('delete')
             .setDescription('Delete a group you own from KARC (does not delete its Discord roles)'),
     );
@@ -71,4 +77,5 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     if (sub === 'info')              return groupInfo(interaction);
     if (sub === 'viewmembers')       return groupViewMembers(interaction);
     if (sub === 'delete')            return groupDelete(interaction);
+    if (sub === 'list')              return groupList(interaction);
 }
