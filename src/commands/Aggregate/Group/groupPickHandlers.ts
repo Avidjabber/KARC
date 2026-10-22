@@ -14,6 +14,7 @@ async function fetchGroupsForGuild(guildId: string) {
 }
 
 const notFound = [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: 'This group no longer exists.' }] }];
+const noGroups = [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: 'No groups exist in this server.' }] }];
 
 export async function handleGroupPickPage(interaction: ButtonInteraction): Promise<void> {
     const parts   = interaction.customId.split(':');
@@ -22,6 +23,11 @@ export async function handleGroupPickPage(interaction: ButtonInteraction): Promi
     const guildId = interaction.guildId!;
 
     const groups = await fetchGroupsForGuild(guildId);
+
+    if (groups.length === 0) {
+        await interaction.reply({ flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2, components: noGroups } as never);
+        return;
+    }
 
     await interaction.update({
         flags:      MessageFlags.IsComponentsV2,
@@ -40,7 +46,7 @@ export async function handleGroupPickView(interaction: ButtonInteraction): Promi
     if (action === 'viewroles') {
         const view = await renderRoleView(groupId, guildId);
         if (!view) {
-            await interaction.editReply({ flags: MessageFlags.IsComponentsV2, components: notFound } as never);
+            await interaction.followUp({ flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2, components: notFound } as never);
             return;
         }
         await interaction.editReply({
@@ -53,7 +59,7 @@ export async function handleGroupPickView(interaction: ButtonInteraction): Promi
 
     const group = await fetchGroupWithMembers(groupId);
     if (!group || group.guildId !== guildId) {
-        await interaction.editReply({ flags: MessageFlags.IsComponentsV2, components: notFound } as never);
+        await interaction.followUp({ flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2, components: notFound } as never);
         return;
     }
     await interaction.editReply({

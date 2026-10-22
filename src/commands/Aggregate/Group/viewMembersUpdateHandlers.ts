@@ -18,7 +18,13 @@ export async function handleViewMembersUpdate(interaction: ButtonInteraction): P
             },
         },
     });
-    if (!group || group.guildId !== guildId) return;
+    if (!group || group.guildId !== guildId) {
+        await interaction.followUp({
+            flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+            components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: 'This group no longer exists.' }] }],
+        } as never);
+        return;
+    }
 
     await interaction.editReply({
         flags:      MessageFlags.IsComponentsV2,
@@ -34,8 +40,8 @@ export async function handleViewMembersPage(interaction: ButtonInteraction): Pro
     const group = await fetchGroupWithMembers(groupId);
 
     if (!group) {
-        await interaction.update({
-            flags:      MessageFlags.IsComponentsV2,
+        await interaction.reply({
+            flags:      MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
             components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: 'This group no longer exists.' }] }],
         } as never);
         return;
