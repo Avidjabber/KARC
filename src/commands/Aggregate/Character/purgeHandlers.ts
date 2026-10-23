@@ -1,5 +1,6 @@
 import { ButtonInteraction, MessageFlags } from 'discord.js';
 import { colors } from '../../../core/colors.js';
+import { removeUnheldDiscordRoles } from '../../../core/discordRoleCleanup.js';
 import { isServerAdmin } from '../../../core/permissions.js';
 import { db } from '../../../db/index.js';
 import { buildPurgeConfirmation, buildPurgeListComponents } from './purge.js';
@@ -94,33 +95,12 @@ export async function handlePurgeConfirm(interaction: ButtonInteraction): Promis
     // Cascades to GroupRoleMember rows for this character.
     await db.character.delete({ where: { id: characterId } });
 
-    // If the owner has left the server there's nothing to clean up on the Discord side.
-    const discordMember = character.memberships.length > 0
-        ? await guild.members.fetch(character.userId).catch(() => null)
-        : null;
-
-    if (discordMember) {
-        // The owner may have other characters in the same groups/roles — only drop Discord roles none of them still hold.
-        const remaining = await db.groupRoleMember.findMany({
-            where:   { userId: character.userId, group: { guildId } },
-            include: { group: true, groupRole: true },
-        });
-        const stillHeld = new Set(remaining.flatMap(m => [m.groupRole.discordRoleId, m.group.discordRoleId]));
-
-        const toRemove = new Set(
-            character.memberships
-                .flatMap(m => [m.groupRole.discordRoleId, m.group.discordRoleId])
-                .filter((id): id is string => !!id && !stillHeld.has(id)),
-        );
-
-        for (const roleId of toRemove) {
-            try {
-                await discordMember.roles.remove(roleId, `KARC: character ${character.name} purged by an administrator`);
-            } catch (err) {
-                console.error('[character purge confirm] Discord role remove failed:', err);
-            }
-        }
-    }
+    // The owner may have other characters in the same groups/roles — only drop Discord roles none of them still hold.
+    await removeUnheldDiscordRoles(
+        guild, character.userId,
+        character.memberships.flatMap(m => [m.groupRole.discordRoleId, m.group.discordRoleId]),
+        `KARC: character ${character.name} purged by an administrator`,
+    );
 
     // Best-effort — drop Career/Residence tags no other remaining character of theirs still carries.
     try {

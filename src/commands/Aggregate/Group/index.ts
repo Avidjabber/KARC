@@ -6,6 +6,7 @@ import { execute as groupInfo } from './info.js';
 import { execute as groupViewMembers } from './viewMembers.js';
 import { execute as groupDelete } from './delete.js';
 import { execute as groupList } from './list.js';
+import { execute as groupRemoveMembers } from './removeMembers.js';
 
 export const data = new SlashCommandBuilder()
     .setName('group')
@@ -60,6 +61,11 @@ export const data = new SlashCommandBuilder()
     )
     .addSubcommand(sub =>
         sub
+            .setName('removemembers')
+            .setDescription('Browse a group\'s members and remove characters from it'),
+    )
+    .addSubcommand(sub =>
+        sub
             .setName('delete')
             .setDescription('Delete a group you own from KARC (does not delete its Discord roles)'),
     );
@@ -78,4 +84,5 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     if (sub === 'viewmembers')       return groupViewMembers(interaction);
     if (sub === 'delete')            return groupDelete(interaction);
     if (sub === 'list')              return groupList(interaction);
+    if (sub === 'removemembers')     return groupRemoveMembers(interaction);
 }

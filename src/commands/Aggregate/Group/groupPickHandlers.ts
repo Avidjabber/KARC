@@ -2,6 +2,7 @@ import { ButtonInteraction, MessageFlags } from 'discord.js';
 import { colors } from '../../../core/colors.js';
 import { db } from '../../../db/index.js';
 import { buildGroupPickerComponents, PickAction } from './groupPicker.js';
+import { buildRemoveMembersComponents, callerFrom, canRemoveMembers, fetchManageableGroups } from './removeMembers.js';
 import { renderRoleView } from './role.js';
 import { buildViewMembersComponents, fetchGroupWithMembers } from './viewMembers.js';
 
@@ -22,7 +23,10 @@ export async function handleGroupPickPage(interaction: ButtonInteraction): Promi
     const page    = parseInt(parts[2] ?? '0', 10);
     const guildId = interaction.guildId!;
 
-    const groups = await fetchGroupsForGuild(guildId);
+    // removemembers only lists the groups the caller can manage; the view pickers list every group
+    const groups = action === 'removemembers'
+        ? await fetchManageableGroups(guildId, callerFrom(interaction))
+        : await fetchGroupsForGuild(guildId);
 
     if (groups.length === 0) {
         await interaction.reply({ flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2, components: noGroups } as never);
@@ -42,6 +46,19 @@ export async function handleGroupPickView(interaction: ButtonInteraction): Promi
     const guildId = interaction.guildId!;
 
     await interaction.deferUpdate();
+
+    if (action === 'removemembers') {
+        if (!await canRemoveMembers(groupId, guildId, callerFrom(interaction))) {
+            await interaction.editReply({
+                flags:      MessageFlags.IsComponentsV2,
+                components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: 'You do not have permission to remove members from this group.' }] }],
+            } as never);
+            return;
+        }
+        const components = await buildRemoveMembersComponents(interaction.guild!, groupId, 0);
+        await interaction.editReply({ flags: MessageFlags.IsComponentsV2, components: components ?? notFound } as never);
+        return;
+    }
 
     if (action === 'viewroles') {
         const view = await renderRoleView(groupId, guildId);

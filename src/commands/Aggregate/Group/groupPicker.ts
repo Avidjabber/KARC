@@ -1,4 +1,10 @@
-export type PickAction = 'viewroles' | 'viewmembers';
+export type PickAction = 'viewroles' | 'viewmembers' | 'removemembers';
+
+const PICK_TEXT: Record<PickAction, { prompt: string; label: string }> = {
+    viewroles:     { prompt: 'Select a group to view:',                label: 'View' },
+    viewmembers:   { prompt: 'Select a group to view:',                label: 'View' },
+    removemembers: { prompt: 'Select a group to remove members from:', label: 'Select' },
+};
 
 const GROUPS_PER_PAGE = 10;
 
@@ -10,12 +16,12 @@ export function buildGroupPickerComponents(groups: PickableGroup[], page: number
     const pageGroups  = groups.slice(safePage * GROUPS_PER_PAGE, (safePage + 1) * GROUPS_PER_PAGE);
 
     const inner: unknown[] = [
-        { type: 10, content: 'Select a group to view:' },
+        { type: 10, content: PICK_TEXT[action].prompt },
         { type: 14, divider: true },
         ...pageGroups.map(g => ({
             type:       9,
             components: [{ type: 10, content: `**${g.name}**\n-# ${g.codeName}` }],
-            accessory:  { type: 2, style: 1, label: 'View', custom_id: `group_pick_view:${action}:${g.id}` },
+            accessory:  { type: 2, style: 1, label: PICK_TEXT[action].label, custom_id: `group_pick_view:${action}:${g.id}` },
         })),
     ];
 

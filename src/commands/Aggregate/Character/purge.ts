@@ -1,5 +1,6 @@
-import { ChatInputCommandInteraction, Collection, Guild, GuildMember, MessageFlags } from 'discord.js';
+import { ChatInputCommandInteraction, Guild, MessageFlags } from 'discord.js';
 import { colors } from '../../../core/colors.js';
+import { fetchOwnerLabels } from '../../../core/memberDisplay.js';
 import { isServerAdmin } from '../../../core/permissions.js';
 import { db } from '../../../db/index.js';
 
@@ -45,22 +46,7 @@ export async function buildPurgeListComponents(guild: Guild, page: number, notic
         },
     });
 
-    // Anyone missing from the batch fetch is no longer in the server — look up their username directly instead.
-    const ownerIds = [...new Set(characters.map(c => c.userId))];
-    const present: Collection<string, GuildMember> = ownerIds.length > 0
-        ? await guild.members.fetch({ user: ownerIds }).catch(() => new Collection<string, GuildMember>())
-        : new Collection<string, GuildMember>();
-
-    const ownerLabels = new Map<string, string>();
-    for (const id of ownerIds) {
-        const member = present.get(id);
-        if (member) {
-            ownerLabels.set(id, `Owner: **${member.user.username}**`);
-        } else {
-            const user = await guild.client.users.fetch(id).catch(() => null);
-            ownerLabels.set(id, `Owner: ⚠️ ~~${user?.username ?? id}~~ — *no longer in this server*`);
-        }
-    }
+    const ownerLabels = await fetchOwnerLabels(guild, characters.map(c => c.userId));
 
     // Header and notice share one text display — a full page sits close to Discord's 40-component limit.
     const inner: unknown[] = [
