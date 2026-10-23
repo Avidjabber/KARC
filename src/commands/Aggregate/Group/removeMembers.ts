@@ -35,7 +35,7 @@ export function fetchManageableGroups(guildId: string, caller: Caller) {
 
 /**
  * What the caller may remove in a group: everyone (admin, owner, Can Manage Group), or — via Can Manage
- * Assignments — only characters ranked strictly below `maxRank`, matching `/roles remove`. Null if neither.
+ * Assignments — only characters ranked strictly below `maxRank`. Null if neither.
  */
 export type RemoveAccess = { full: true } | { full: false; maxRank: number };
 

@@ -66,7 +66,7 @@ const PAGES: HelpPage[] = [
         body: [
             '**Create a character**\nEach member runs `/character create`, sets a **Name** using its **Edit** button, then presses **Done**. **Bio**, **Career**, and **Residence** are optional — Career and Residence are picked from a list.',
             '**Assign a character to a role**\nRun `/roles assign`, choose the **user** and the **role**, then pick which of their characters should hold it. The member receives the role\'s Discord role and the group\'s Discord role.',
-            'A character holds one role per group — assigning a new role in the same group moves them. Use `/roles remove` to take them out, or `/group removemembers` to browse the whole group.',
+            'A character holds one role per group — assigning a new role in the same group moves them. Use `/group removemembers` to take them out.',
             '-# Assigning needs group ownership, Can Manage Group, or Can Manage Assignments at a rank at least as high as the role. See everyone with `/group viewmembers`.',
         ],
     },

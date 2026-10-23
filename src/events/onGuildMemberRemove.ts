@@ -6,7 +6,7 @@ import { db } from '../db/index.js';
  * Notify-only cleanup hook: when a member leaves, nothing in the database or on Discord is
  * touched automatically. If they still held a role in any group, each affected group's owner
  * gets a DM summarizing what they held, so the owner can decide whether to run
- * `/roles remove` or `/character purge`.
+ * `/group removemembers` or `/character purge`.
  */
 export default async function onGuildMemberRemove(member: GuildMember | PartialGuildMember): Promise<void> {
     try {
@@ -51,7 +51,7 @@ export default async function onGuildMemberRemove(member: GuildMember | PartialG
                 .addTextDisplayComponents(
                     new TextDisplayBuilder().setContent(
                         `**${member.user.tag}** just left **${member.guild.name}** while still holding a role in your group(s):\n\n${lines}\n\n`
-                        + `-# Nothing has been changed. Run \`/roles remove\` or \`/character purge\` if you want to clean this up.`,
+                        + `-# Nothing has been changed. Run \`/group removemembers\` or \`/character purge\` if you want to clean this up.`,
                     ),
                 );
 

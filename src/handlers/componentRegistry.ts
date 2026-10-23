@@ -24,8 +24,6 @@ import { handleGroupPickPage, handleGroupPickView } from '../commands/Aggregate/
 import { handleGroupListPage, handleGroupListInfo } from '../commands/Aggregate/Group/listHandlers.js';
 import { handleRemoveMembersPage, handleRemoveMembersRemove, handleRemoveMembersConfirm, handleRemoveMembersCancel } from '../commands/Aggregate/Group/removeMembersHandlers.js';
 import { handleHelpPage } from '../commands/TopLevel/Utility/help.js';
-import { handleRemoveCharSelect } from '../commands/Aggregate/Roles/removeCharSelectHandlers.js';
-import { handleRemoveConfirm, handleRemoveCancel } from '../commands/Aggregate/Roles/removeConfirmHandlers.js';
 import { handleGroupDeleteGroupSelect } from '../commands/Aggregate/Group/deleteGroupSelectHandlers.js';
 import { handleGroupDeleteConfirm, handleGroupDeleteCancel } from '../commands/Aggregate/Group/deleteConfirmHandlers.js';
 import {
@@ -83,7 +81,6 @@ export const selectMenuHandlers: ComponentHandler[] = [
     { prefix: 'roles_demote_char:',   handler: i => handleDemoteCharSelect(i as StringSelectMenuInteraction) },
     { prefix: 'roles_demote_group',   handler: i => handleDemoteGroupSelect(i as StringSelectMenuInteraction) },
     { prefix: 'roles_demote_role:',          handler: i => handleDemoteRoleSelect(i as StringSelectMenuInteraction) },
-    { prefix: 'roles_remove_char_select',   handler: i => handleRemoveCharSelect(i as StringSelectMenuInteraction) },
     { prefix: 'roles_setprog_group_select', handler: i => handleSetProgressionGroupSelect(i as StringSelectMenuInteraction) },
     { prefix: 'group_delete_group_select', handler: i => handleGroupDeleteGroupSelect(i as StringSelectMenuInteraction) },
     { prefix: 'roles_assign_char_select:', handler: i => handleAssignCharSelect(i as StringSelectMenuInteraction) },
@@ -103,8 +100,6 @@ export const buttonHandlers: ComponentHandler[] = [
     { prefix: 'group_viewroles_update:', handler: i => handleViewRolesUpdate(i as ButtonInteraction) },
     { prefix: 'group_viewmembers_update:', handler: i => handleViewMembersUpdate(i as ButtonInteraction) },
     { prefix: 'group_viewmembers_page:',   handler: i => handleViewMembersPage(i as ButtonInteraction) },
-    { prefix: 'roles_remove_confirm:',   handler: i => handleRemoveConfirm(i as ButtonInteraction) },
-    { prefix: 'roles_remove_cancel',    handler: i => handleRemoveCancel(i as ButtonInteraction) },
     { prefix: 'group_removemembers_page:',    handler: i => handleRemoveMembersPage(i as ButtonInteraction) },
     { prefix: 'group_removemembers_remove:',  handler: i => handleRemoveMembersRemove(i as ButtonInteraction) },
     { prefix: 'group_removemembers_confirm:', handler: i => handleRemoveMembersConfirm(i as ButtonInteraction) },

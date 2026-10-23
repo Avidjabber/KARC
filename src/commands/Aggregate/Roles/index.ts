@@ -2,7 +2,6 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { execute as rolesCreate }         from './create.js';
 import { execute as rolesEdit }           from './edit.js';
 import { execute as rolesAssign }         from './assign.js';
-import { execute as rolesRemove }         from './remove.js';
 import { execute as rolesPromote }        from './promote.js';
 import { execute as rolesDemote }         from './demote.js';
 import { execute as rolesSetProgression } from './setProgression.js';
@@ -42,23 +41,6 @@ export const data = new SlashCommandBuilder()
                 opt
                     .setName('role')
                     .setDescription('Group role to assign')
-                    .setRequired(true),
-            ),
-    )
-    .addSubcommand(sub =>
-        sub
-            .setName('remove')
-            .setDescription('Remove a member from a role')
-            .addUserOption(opt =>
-                opt
-                    .setName('user')
-                    .setDescription('The server member to remove')
-                    .setRequired(true),
-            )
-            .addRoleOption(opt =>
-                opt
-                    .setName('role')
-                    .setDescription('The role to remove them from')
                     .setRequired(true),
             ),
     )
@@ -119,7 +101,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     if (sub === 'create')        return rolesCreate(interaction);
     if (sub === 'edit')          return rolesEdit(interaction);
     if (sub === 'assign')        return rolesAssign(interaction);
-    if (sub === 'remove')        return rolesRemove(interaction);
     if (sub === 'promote')       return rolesPromote(interaction);
     if (sub === 'demote')        return rolesDemote(interaction);
     if (sub === 'setprogression') return rolesSetProgression(interaction);
