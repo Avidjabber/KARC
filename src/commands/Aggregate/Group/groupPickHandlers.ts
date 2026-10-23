@@ -2,7 +2,7 @@ import { ButtonInteraction, MessageFlags } from 'discord.js';
 import { colors } from '../../../core/colors.js';
 import { db } from '../../../db/index.js';
 import { buildGroupPickerComponents, PickAction } from './groupPicker.js';
-import { buildRemoveMembersComponents, callerFrom, canRemoveMembers, fetchManageableGroups } from './removeMembers.js';
+import { buildRemoveMembersComponents, callerFrom, fetchManageableGroups, getRemoveAccess } from './removeMembers.js';
 import { renderRoleView } from './role.js';
 import { buildViewMembersComponents, fetchGroupWithMembers } from './viewMembers.js';
 
@@ -48,14 +48,15 @@ export async function handleGroupPickView(interaction: ButtonInteraction): Promi
     await interaction.deferUpdate();
 
     if (action === 'removemembers') {
-        if (!await canRemoveMembers(groupId, guildId, callerFrom(interaction))) {
+        const access = await getRemoveAccess(groupId, guildId, callerFrom(interaction));
+        if (!access) {
             await interaction.editReply({
                 flags:      MessageFlags.IsComponentsV2,
                 components: [{ type: 17, accent_color: colors.error, components: [{ type: 10, content: 'You do not have permission to remove members from this group.' }] }],
             } as never);
             return;
         }
-        const components = await buildRemoveMembersComponents(interaction.guild!, groupId, 0);
+        const components = await buildRemoveMembersComponents(interaction.guild!, groupId, 0, access);
         await interaction.editReply({ flags: MessageFlags.IsComponentsV2, components: components ?? notFound } as never);
         return;
     }

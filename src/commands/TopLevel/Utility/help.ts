@@ -18,7 +18,7 @@ const PAGES: HelpPage[] = [
             + '**2. Create its roles** — `/roles create`\n'
             + '**3. Link roles into a progression** — `/roles setprogression`\n'
             + '**4. Create characters and assign them** — `/character create`, then `/roles assign`',
-            '-# Use the buttons below to walk through each step.',
+            '-# Use the buttons below to walk through each step. **More** covers managing members and other commands.',
         ],
     },
     {
@@ -64,17 +64,49 @@ const PAGES: HelpPage[] = [
         label: '4 · Characters',
         title: 'Step 4 — Create Characters and Assign Roles',
         body: [
-            '**Create a character**\nEach member runs `/character create`, fills in **Name**, **Bio**, **Career**, and **Residence** using the **Edit** buttons, then presses **Done**.',
+            '**Create a character**\nEach member runs `/character create`, sets a **Name** using its **Edit** button, then presses **Done**. **Bio**, **Career**, and **Residence** are optional — Career and Residence are picked from a list.',
             '**Assign a character to a role**\nRun `/roles assign`, choose the **user** and the **role**, then pick which of their characters should hold it. The member receives the role\'s Discord role and the group\'s Discord role.',
-            'A character holds one role per group — assigning a new role in the same group moves them. Use `/roles remove` to take them out.',
+            'A character holds one role per group — assigning a new role in the same group moves them. Use `/roles remove` to take them out, or `/group removemembers` to browse the whole group.',
             '-# Assigning needs group ownership, Can Manage Group, or Can Manage Assignments at a rank at least as high as the role. See everyone with `/group viewmembers`.',
+        ],
+    },
+    {
+        label: 'More',
+        title: 'Managing Members and Other Commands',
+        body: [
+            '**Remove members from a group** — `/group removemembers`\n'
+            + 'Lists every character in a group you own or manage, with their role and owner. Press **Remove** beside one, then confirm, to take them out of the group. The character itself is kept.\n'
+            + '-# With Can Manage Assignments, you can only remove characters ranked below your own role.',
+            '**Clean up characters** — `/character purge` *(Administrators only)*\n'
+            + 'Lists every character in the server, with their groups and ranks. Owners who have left the server are marked with ⚠️. Press **Delete** beside one, then confirm, to remove it from its groups and delete it permanently.',
+            '**Other commands**\n'
+            + '• **Characters** — `/character edit`, `/character list`, `/character info`, `/character delete`\n'
+            + '• **Roles** — `/roles edit`, `/roles delete`, `/roles sync`\n'
+            + '• **Groups** — `/group transferownership`, `/group delete`\n'
+            + '• **Data** — `/data exportgroup` exports a group to an Excel file',
+            '-# Removing a member or character only drops Discord roles that none of the owner\'s other characters still hold.',
         ],
     },
 ];
 
+// Discord allows at most 5 buttons per action row
+const BUTTONS_PER_ROW = 5;
+
 function buildHelpComponents(page: number): unknown[] {
     const safePage = Math.min(Math.max(page, 0), PAGES.length - 1);
     const current  = PAGES[safePage];
+
+    const buttons = PAGES.map((p, i) => ({
+        type:      2,
+        style:     i === safePage ? 1 : 2,
+        label:     p.label,
+        custom_id: `help_page:${i}`,
+        disabled:  i === safePage,
+    }));
+    const rows: unknown[] = [];
+    for (let i = 0; i < buttons.length; i += BUTTONS_PER_ROW) {
+        rows.push({ type: 1, components: buttons.slice(i, i + BUTTONS_PER_ROW) });
+    }
 
     return [{
         type:         17,
@@ -84,16 +116,7 @@ function buildHelpComponents(page: number): unknown[] {
             { type: 14, divider: true },
             ...current.body.map(content => ({ type: 10, content })),
             { type: 14, divider: true },
-            {
-                type:       1,
-                components: PAGES.map((p, i) => ({
-                    type:      2,
-                    style:     i === safePage ? 1 : 2,
-                    label:     p.label,
-                    custom_id: `help_page:${i}`,
-                    disabled:  i === safePage,
-                })),
-            },
+            ...rows,
         ],
     }];
 }

@@ -2,7 +2,7 @@ import { ButtonInteraction, MessageFlags } from 'discord.js';
 import { colors } from '../../../core/colors.js';
 import { removeUnheldDiscordRoles } from '../../../core/discordRoleCleanup.js';
 import { db } from '../../../db/index.js';
-import { buildRemoveMemberConfirmation, buildRemoveMembersComponents, callerFrom, canRemoveMembers } from './removeMembers.js';
+import { buildRemoveMemberConfirmation, buildRemoveMembersComponents, callerFrom, canRemoveAtRank, getRemoveAccess } from './removeMembers.js';
 
 async function showResult(interaction: ButtonInteraction, content: string, accentColor?: number): Promise<void> {
     await interaction.update({
@@ -17,12 +17,13 @@ export async function handleRemoveMembersPage(interaction: ButtonInteraction): P
     const guildId = interaction.guildId!;
 
     // Re-checked on every click in case permissions changed since the command ran
-    if (!await canRemoveMembers(groupId, guildId, callerFrom(interaction))) {
+    const access = await getRemoveAccess(groupId, guildId, callerFrom(interaction));
+    if (!access) {
         await showResult(interaction, 'You no longer have permission to do this.', colors.error);
         return;
     }
 
-    const components = await buildRemoveMembersComponents(interaction.guild!, groupId, parseInt(pageStr ?? '0', 10));
+    const components = await buildRemoveMembersComponents(interaction.guild!, groupId, parseInt(pageStr ?? '0', 10), access);
     if (!components) {
         await showResult(interaction, 'This group no longer exists.', colors.error);
         return;
@@ -37,6 +38,15 @@ function fetchMember(memberId: string) {
     });
 }
 
+/** True if the caller may remove this member right now — group access plus, for Can Manage Assignments, the rank check. */
+async function mayRemove(
+    interaction: ButtonInteraction,
+    member: { groupId: string; groupRole: { position: number } },
+): Promise<boolean> {
+    const access = await getRemoveAccess(member.groupId, interaction.guildId!, callerFrom(interaction));
+    return !!access && canRemoveAtRank(access, member.groupRole.position);
+}
+
 // customId: group_removemembers_remove:<memberId>
 export async function handleRemoveMembersRemove(interaction: ButtonInteraction): Promise<void> {
     const memberId = interaction.customId.slice('group_removemembers_remove:'.length);
@@ -48,7 +58,7 @@ export async function handleRemoveMembersRemove(interaction: ButtonInteraction):
         return;
     }
 
-    if (!await canRemoveMembers(member.groupId, guildId, callerFrom(interaction))) {
+    if (!await mayRemove(interaction, member)) {
         await showResult(interaction, 'You no longer have permission to do this.', colors.error);
         return;
     }
@@ -70,7 +80,7 @@ export async function handleRemoveMembersConfirm(interaction: ButtonInteraction)
         return;
     }
 
-    if (!await canRemoveMembers(member.groupId, guildId, callerFrom(interaction))) {
+    if (!await mayRemove(interaction, member)) {
         await showResult(interaction, 'You no longer have permission to do this.', colors.error);
         return;
     }

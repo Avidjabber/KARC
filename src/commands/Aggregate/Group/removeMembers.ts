@@ -15,7 +15,7 @@ export function callerFrom(interaction: Parameters<typeof isServerAdmin>[0] & { 
     return { userId: interaction.user.id, isAdmin: isServerAdmin(interaction) };
 }
 
-/** Groups the caller may remove members from: all of them for server admins, otherwise ones they own or hold Can Manage Group in. */
+/** Groups the caller may remove members from: all of them for server admins, otherwise ones they own or hold Can Manage Group / Can Manage Assignments in. */
 export function fetchManageableGroups(guildId: string, caller: Caller) {
     return db.group.findMany({
         where: caller.isAdmin
@@ -25,6 +25,7 @@ export function fetchManageableGroups(guildId: string, caller: Caller) {
                 OR: [
                     { ownerId: caller.userId },
                     { members: { some: { userId: caller.userId, groupRole: { canManageGroup: true } } } },
+                    { members: { some: { userId: caller.userId, groupRole: { canManageAssignments: true } } } },
                 ],
             },
         select:  { id: true, codeName: true, name: true },
@@ -32,19 +33,36 @@ export function fetchManageableGroups(guildId: string, caller: Caller) {
     });
 }
 
-export async function canRemoveMembers(groupId: string, guildId: string, caller: Caller): Promise<boolean> {
+/**
+ * What the caller may remove in a group: everyone (admin, owner, Can Manage Group), or — via Can Manage
+ * Assignments — only characters ranked strictly below `maxRank`, matching `/roles remove`. Null if neither.
+ */
+export type RemoveAccess = { full: true } | { full: false; maxRank: number };
+
+export async function getRemoveAccess(groupId: string, guildId: string, caller: Caller): Promise<RemoveAccess | null> {
     const group = await db.group.findUnique({ where: { id: groupId } });
-    if (!group || group.guildId !== guildId) return false;
-    if (caller.isAdmin || group.ownerId === caller.userId) return true;
+    if (!group || group.guildId !== guildId) return null;
+    if (caller.isAdmin || group.ownerId === caller.userId) return { full: true };
 
     const manageGroup = await db.groupRoleMember.findFirst({
         where: { groupId, userId: caller.userId, groupRole: { canManageGroup: true } },
     });
-    return !!manageGroup;
+    if (manageGroup) return { full: true };
+
+    const assignments = await db.groupRoleMember.findFirst({
+        where:   { groupId, userId: caller.userId, groupRole: { canManageAssignments: true } },
+        orderBy: { groupRole: { position: 'desc' } },
+        include: { groupRole: true },
+    });
+    return assignments ? { full: false, maxRank: assignments.groupRole.position } : null;
 }
 
-/** Paginated list of every character in a group, each with a Remove button. Returns null if the group is gone. */
-export async function buildRemoveMembersComponents(guild: Guild, groupId: string, page: number): Promise<unknown[] | null> {
+export function canRemoveAtRank(access: RemoveAccess, position: number): boolean {
+    return access.full || position < access.maxRank;
+}
+
+/** Paginated list of every character in a group, each with a Remove button (disabled where `access` doesn't reach). Returns null if the group is gone. */
+export async function buildRemoveMembersComponents(guild: Guild, groupId: string, page: number, access: RemoveAccess): Promise<unknown[] | null> {
     const group = await db.group.findUnique({ where: { id: groupId } });
     if (!group || group.guildId !== guild.id) return null;
 
@@ -66,7 +84,7 @@ export async function buildRemoveMembersComponents(guild: Guild, groupId: string
     const ownerLabels = await fetchOwnerLabels(guild, members.map(m => m.userId));
 
     const inner: unknown[] = [
-        { type: 10, content: `## Remove Members — ${group.name}\n-# ${group.codeName} · ${total} member(s)` },
+        { type: 10, content: `## Remove Members — ${group.name}\n-# ${group.codeName} · ${total} member(s)${access.full ? '' : `\n-# You can remove characters ranked below **Rank ${access.maxRank}**.`}` },
         { type: 14, divider: true },
     ];
 
@@ -78,7 +96,7 @@ export async function buildRemoveMembersComponents(guild: Guild, groupId: string
             inner.push({
                 type:       9,
                 components: [{ type: 10, content: text.slice(0, ENTRY_MAX_LENGTH) }],
-                accessory:  { type: 2, style: 4, label: 'Remove', custom_id: `group_removemembers_remove:${m.id}` },
+                accessory:  { type: 2, style: 4, label: 'Remove', custom_id: `group_removemembers_remove:${m.id}`, disabled: !canRemoveAtRank(access, m.groupRole.position) },
             });
         }
     }
@@ -119,7 +137,8 @@ export function buildRemoveMemberConfirmation(member: {
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
     const guildId = interaction.guildId!;
-    const groups  = await fetchManageableGroups(guildId, callerFrom(interaction));
+    const caller  = callerFrom(interaction);
+    const groups  = await fetchManageableGroups(guildId, caller);
 
     if (groups.length === 0) {
         await interaction.editReply({
@@ -130,9 +149,10 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     }
 
     if (groups.length === 1) {
+        const access = (await getRemoveAccess(groups[0].id, guildId, caller))!;
         await interaction.editReply({
             flags:      MessageFlags.IsComponentsV2,
-            components: (await buildRemoveMembersComponents(interaction.guild!, groups[0].id, 0))!,
+            components: (await buildRemoveMembersComponents(interaction.guild!, groups[0].id, 0, access))!,
         } as never);
         return;
     }
