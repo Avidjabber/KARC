@@ -2,12 +2,14 @@ import { MessageFlags, ModalSubmitInteraction } from 'discord.js';
 import { colors } from '../../../core/colors.js';
 import { validateDisplayName, validateCodeName, FILTER_MESSAGES } from '../../../core/contentFilter.js';
 import { extractField } from '../../../core/modalUtils.js';
+import { DEFAULT_GRAPH_THEME, isGraphTheme } from '../../../core/roleGraph.js';
 import { db } from '../../../db/index.js';
 
 // customId: group_create_modal
 export async function handleGroupCreateModal(interaction: ModalSubmitInteraction): Promise<void> {
     const rawName     = extractField(interaction, 'name');
     const rawCodeName = extractField(interaction, 'code_name');
+    const rawTheme    = extractField(interaction, 'background_theme');
     const guildId     = interaction.guildId!;
     const userId      = interaction.user.id;
 
@@ -28,6 +30,7 @@ export async function handleGroupCreateModal(interaction: ModalSubmitInteraction
 
     const name     = nameResult.value;
     const codeName = codeNameResult.value;
+    const backgroundTheme = isGraphTheme(rawTheme) ? rawTheme : DEFAULT_GRAPH_THEME;
 
     if (!name || !codeName) {
         await interaction.reply({
@@ -67,7 +70,7 @@ export async function handleGroupCreateModal(interaction: ModalSubmitInteraction
     let group;
     try {
         group = await db.group.create({
-            data: { codeName, name, ownerId: userId, guildId, discordRoleId },
+            data: { codeName, name, ownerId: userId, guildId, discordRoleId, backgroundTheme },
         });
     } catch (err) {
         if (!synced) await guild.roles.delete(discordRoleId, 'KARC: rolling back after DB error').catch(() => null);

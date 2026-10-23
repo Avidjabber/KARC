@@ -10,16 +10,17 @@ datasource db {
 // ── Add models below ──────────────────────────────────────────────────────────
 
 model Group {
-  id            String            @id @default(cuid())
-  codeName      String            @unique
-  name          String
-  ownerId       String
-  guildId       String
-  discordRoleId String?
-  roles         GroupRole[]
-  members       GroupRoleMember[]
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  id              String            @id @default(cuid())
+  codeName        String            @unique
+  name            String
+  ownerId         String
+  guildId         String
+  discordRoleId   String?
+  backgroundTheme String            @default("moon")
+  roles           GroupRole[]
+  members         GroupRoleMember[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
 
 model GroupRole {
@@ -46,7 +47,7 @@ model GroupRoleProgression {
   fromRoleId String
   fromRole   GroupRole @relation("ProgressionFrom", fields: [fromRoleId], references: [id], onDelete: Cascade)
   toRoleId   String
-  toRole     GroupRole @relation("ProgressionTo",   fields: [toRoleId],   references: [id], onDelete: Cascade)
+  toRole     GroupRole @relation("ProgressionTo", fields: [toRoleId], references: [id], onDelete: Cascade)
 
   @@id([fromRoleId, toRoleId])
 }

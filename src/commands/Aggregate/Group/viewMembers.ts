@@ -141,7 +141,7 @@ export function buildViewMembersComponents(group: GroupWithMemberRoles, page = 0
             { type: 2, style: 2, label: '▶', custom_id: `group_viewmembers_page:${group.id}:${safePage + 1}`, disabled: safePage === totalPages - 1 },
         );
     }
-    buttonRow.push({ type: 2, style: 1, label: 'Update', custom_id: `group_viewmembers_update:${group.codeName}` });
+    buttonRow.push({ type: 2, style: 1, label: 'Update', custom_id: `group_viewmembers_update:${group.id}` });
 
     return [
         {

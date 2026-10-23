@@ -2,6 +2,7 @@ import { ButtonInteraction, MessageComponentInteraction, ModalSubmitInteraction,
 import { handleGroupCreateModal } from '../commands/Aggregate/Group/createHandlers.js';
 import { handleGroupTransferAccept, handleGroupTransferReject } from '../commands/Aggregate/Group/transferOwnershipHandlers.js';
 import { handleGroupInfoPage, handleGroupInfoStats, handleGroupInfoDone } from '../commands/Aggregate/Group/infoHandlers.js';
+import { handleGroupInfoEdit, handleGroupEditModal } from '../commands/Aggregate/Group/editHandlers.js';
 import { handleRoleCreateModal } from '../commands/Aggregate/Roles/createModalHandlers.js';
 import { handleRoleEditModal } from '../commands/Aggregate/Roles/editModalHandlers.js';
 import { handleSetProgressionGroupSelect } from '../commands/Aggregate/Roles/setProgressionGroupSelectHandlers.js';
@@ -59,6 +60,7 @@ export interface ComponentHandler {
 // ── Modal handlers ─────────────────────────────────────────────────────────────
 export const modalHandlers: ComponentHandler[] = [
     { prefix: 'group_create_modal', handler: i => handleGroupCreateModal(i as ModalSubmitInteraction) },
+    { prefix: 'group_edit_modal:',  handler: i => handleGroupEditModal(i as ModalSubmitInteraction) },
     { prefix: 'roles_create_modal', handler: i => handleRoleCreateModal(i as ModalSubmitInteraction) },
     { prefix: 'roles_delete_modal:', handler: i => handleRoleDeleteModal(i as ModalSubmitInteraction) },
     { prefix: 'roles_edit_modal',             handler: i => handleRoleEditModal(i as ModalSubmitInteraction) },
@@ -97,6 +99,7 @@ export const buttonHandlers: ComponentHandler[] = [
     { prefix: 'group_info_page:',       handler: i => handleGroupInfoPage(i as ButtonInteraction) },
     { prefix: 'group_info_stats:',      handler: i => handleGroupInfoStats(i as ButtonInteraction) },
     { prefix: 'group_info_done:',        handler: i => handleGroupInfoDone(i as ButtonInteraction) },
+    { prefix: 'group_info_edit:',        handler: i => handleGroupInfoEdit(i as ButtonInteraction) },
     { prefix: 'group_viewroles_update:', handler: i => handleViewRolesUpdate(i as ButtonInteraction) },
     { prefix: 'group_viewmembers_update:', handler: i => handleViewMembersUpdate(i as ButtonInteraction) },
     { prefix: 'group_viewmembers_page:',   handler: i => handleViewMembersPage(i as ButtonInteraction) },

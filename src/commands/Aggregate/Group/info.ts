@@ -1,15 +1,17 @@
 import { ChatInputCommandInteraction, Collection, Guild, GuildMember, MessageFlags } from 'discord.js';
 import { colors } from '../../../core/colors.js';
+import { DEFAULT_GRAPH_THEME, GRAPH_THEME_OPTIONS } from '../../../core/roleGraph.js';
 import { db } from '../../../db/index.js';
 
 const PAGE_SIZE = 10;
 
 type GroupWithMembers = {
-    id:       string;
-    name:     string;
-    codeName: string;
-    ownerId:  string;
-    guildId:  string;
+    id:              string;
+    name:            string;
+    codeName:        string;
+    ownerId:         string;
+    guildId:         string;
+    backgroundTheme: string;
     members:  Array<{
         userId:    string;
         character: { name: string };
@@ -36,10 +38,12 @@ export async function buildInfoComponents(guild: Guild, group: GroupWithMembers,
         ? await guild.members.fetch({ user: userIds }).catch(() => new Collection<string, GuildMember>())
         : new Collection<string, GuildMember>();
     const handle = (id: string) => fetched.get(id)?.displayName ?? id;
+    const theme  = GRAPH_THEME_OPTIONS.find(o => o.value === group.backgroundTheme)
+        ?? GRAPH_THEME_OPTIONS.find(o => o.value === DEFAULT_GRAPH_THEME)!;
 
     const inner: unknown[] = [
         { type: 10, content: `## ${group.name}` },
-        { type: 10, content: `-# ${group.codeName} — ${handle(group.ownerId)}` },
+        { type: 10, content: `-# ${group.codeName} — ${handle(group.ownerId)} · Theme: ${theme.label}` },
         { type: 14, divider: true },
     ];
 
@@ -74,9 +78,23 @@ export async function buildInfoComponents(guild: Guild, group: GroupWithMembers,
             components: [
                 { type: 2, style: 2, label: 'Done',        custom_id: `group_info_done:${group.id}` },
                 { type: 2, style: 1, label: 'Group Stats', custom_id: `group_info_stats:${group.id}` },
+                { type: 2, style: 2, label: 'Edit Group',  custom_id: `group_info_edit:${group.id}` },
             ],
         },
     ];
+}
+
+/** Loads a group with everything the info view needs, members ordered by rank then character name. */
+export function fetchInfoGroup(groupId: string) {
+    return db.group.findUnique({
+        where:   { id: groupId },
+        include: {
+            members: {
+                include:  { groupRole: { select: { name: true, position: true } }, character: { select: { name: true } } },
+                orderBy:  [{ groupRole: { position: 'desc' } }, { character: { name: 'asc' } }],
+            },
+        },
+    });
 }
 
 export async function buildStatsComponents(guild: Guild, group: GroupWithStats): Promise<unknown[]> {

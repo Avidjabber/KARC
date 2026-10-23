@@ -4,13 +4,14 @@ import { buildViewMembersComponents, fetchGroupWithMembers } from './viewMembers
 import { db } from '../../../db/index.js';
 
 export async function handleViewMembersUpdate(interaction: ButtonInteraction): Promise<void> {
-    const codeName = interaction.customId.slice('group_viewmembers_update:'.length);
+    // Group id; panels posted before ids were used carry the code name instead
+    const key      = interaction.customId.slice('group_viewmembers_update:'.length);
     const guildId  = interaction.guildId!;
 
     await interaction.deferUpdate();
 
-    const group = await db.group.findUnique({
-        where:   { codeName },
+    const group = await db.group.findFirst({
+        where:   { OR: [{ id: key }, { codeName: key }] },
         include: {
             roles: {
                 include: { members: { select: { userId: true, character: { select: { name: true } } } } },

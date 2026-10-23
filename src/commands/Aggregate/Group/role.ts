@@ -1,6 +1,6 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, MessageFlags } from 'discord.js';
 import { colors } from '../../../core/colors.js';
-import { buildRoleGraphBuffer } from '../../../core/roleGraph.js';
+import { buildRoleGraphBuffer, DEFAULT_GRAPH_THEME, isGraphTheme } from '../../../core/roleGraph.js';
 import { buildGroupPickerComponents } from './groupPicker.js';
 import { db } from '../../../db/index.js';
 
@@ -34,7 +34,7 @@ export function buildRolePanelComponents(group: GroupWithRoles): unknown[] {
                 { type: 14, divider: true },
                 { type: 12, items: [{ media: { url: 'attachment://roles.png' } }] },
                 { type: 1, components: [
-                    { type: 2, style: 1, label: 'Update', custom_id: `group_viewroles_update:${group.codeName}` },
+                    { type: 2, style: 1, label: 'Update', custom_id: `group_viewroles_update:${group.id}` },
                 ]},
             ],
         },
@@ -58,7 +58,8 @@ export async function renderRoleView(groupId: string, guildId: string): Promise<
 
     if (!group || group.guildId !== guildId) return null;
 
-    const graphBuffer = buildRoleGraphBuffer(group.roles, group.name);
+    const theme       = isGraphTheme(group.backgroundTheme) ? group.backgroundTheme : DEFAULT_GRAPH_THEME;
+    const graphBuffer = buildRoleGraphBuffer(group.roles, group.name, theme);
     const attachment  = new AttachmentBuilder(graphBuffer, { name: 'roles.png' });
 
     return { files: [attachment], components: buildRolePanelComponents(group) };

@@ -74,14 +74,16 @@ function nodeHeight(role: GraphRole): number {
     return FIRST_MEMBER_Y + n * MEMBER_STEP_H + 8;
 }
 
-// ── Background ────────────────────────────────────────────────────────────────
+// ── Backgrounds ───────────────────────────────────────────────────────────────
+// Each theme only decorates the backdrop; node/edge layout and styling are shared.
 
-function drawBackground(ctx: SKRSContext2D, w: number, h: number, seed: string): void {
-    ctx.fillStyle = BG;
-    ctx.fillRect(0, 0, w, h);
+export type GraphTheme = 'moon' | 'void';
+export const DEFAULT_GRAPH_THEME: GraphTheme = 'moon';
 
-    const rng = seededRng(seed);
+type BackgroundDrawer = (ctx: SKRSContext2D, w: number, h: number, rng: () => number) => void;
+type Background       = { label: string; description: string; base: string; draw: BackgroundDrawer };
 
+function drawMoonBackground(ctx: SKRSContext2D, w: number, h: number, rng: () => number): void {
     // ── Crescent moon (upper-right quadrant) ──────────────────────────────────
     const moonX = w * 0.80;
     const moonY = h * 0.20;
@@ -125,6 +127,105 @@ function drawBackground(ctx: SKRSContext2D, w: number, h: number, seed: string):
     ctx.globalAlpha = 1;
 }
 
+function drawVoidBackground(ctx: SKRSContext2D, w: number, h: number, rng: () => number): void {
+    const cx   = w / 2;
+    const cy   = h / 2;
+    const maxR = Math.hypot(w, h) / 2;
+
+    // ── Vignette: darkest at the core, easing to charcoal at the edges ────────
+    const vignette = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+    vignette.addColorStop(0,   'rgba(0, 0, 0, 0.85)');
+    vignette.addColorStop(0.5, 'rgba(0, 0, 0, 0.35)');
+    vignette.addColorStop(1,   'rgba(30, 30, 34, 0.55)');
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, w, h);
+
+    // ── Spiral arms (logarithmic, r = a·e^(bθ)) ───────────────────────────────
+    // Each arm is one tapered ribbon polygon filled with a radial gradient, so opacity
+    // depends only on distance from the core and there are no overlapping stroke seams.
+    const arms     = 3;
+    const a        = 4;
+    const b        = 0.30;
+    const rotation = rng() * Math.PI * 2;
+    const thetaMax = Math.log(maxR / a) / b;
+    const step     = 0.03;
+
+    // Fades in out of the core, peaks partway out, then dissolves toward the edges
+    const fade = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+    fade.addColorStop(0,    'rgba(184, 184, 196, 0)');
+    fade.addColorStop(0.12, 'rgba(184, 184, 196, 0.045)');
+    fade.addColorStop(0.35, 'rgba(184, 184, 196, 0.035)');
+    fade.addColorStop(0.75, 'rgba(184, 184, 196, 0.012)');
+    fade.addColorStop(1,    'rgba(184, 184, 196, 0)');
+    ctx.fillStyle = fade;
+
+    // Two passes per arm: a wide soft halo, then a narrower core on top
+    for (const widthScale of [1, 0.45]) {
+        for (let arm = 0; arm < arms; arm++) {
+            const offset = rotation + (arm / arms) * Math.PI * 2;
+            const left:  Array<[number, number]> = [];
+            const right: Array<[number, number]> = [];
+
+            for (let t = 0; t <= thetaMax; t += step) {
+                const r   = a * Math.exp(b * t);
+                const ang = t + offset;
+                const x   = cx + r * Math.cos(ang);
+                const y   = cy + r * Math.sin(ang);
+
+                // Tangent of a log spiral sits at a constant angle atan(1/b) from the radius
+                const tan = ang + Math.atan2(1, b);
+                const nx  = -Math.sin(tan);
+                const ny  =  Math.cos(tan);
+                const hw  = (0.5 + (r / maxR) * 34) * widthScale;
+                left.push([x + nx * hw, y + ny * hw]);
+                right.push([x - nx * hw, y - ny * hw]);
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(left[0][0], left[0][1]);
+            for (const [x, y] of left) ctx.lineTo(x, y);
+            for (let i = right.length - 1; i >= 0; i--) ctx.lineTo(right[i][0], right[i][1]);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+
+    // ── Drifting motes, denser near the core ──────────────────────────────────
+    for (let i = 0; i < 60; i++) {
+        const ang = rng() * Math.PI * 2;
+        const r   = Math.pow(rng(), 1.8) * maxR;
+        ctx.globalAlpha = 0.04 + rng() * 0.10;
+        ctx.fillStyle   = '#A0A0AA';
+        ctx.beginPath();
+        ctx.arc(cx + r * Math.cos(ang), cy + r * Math.sin(ang), 0.3 + rng() * 0.9, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+}
+
+const BACKGROUNDS: Record<GraphTheme, Background> = {
+    moon: { label: 'Moon', description: 'Crescent moon and scattered stars', base: BG,        draw: drawMoonBackground },
+    void: { label: 'Void', description: 'Faint spiral fading into darkness', base: '#0E0E10', draw: drawVoidBackground },
+};
+
+// Picker metadata, in display order — new themes show up in the group-create modal automatically
+export const GRAPH_THEME_OPTIONS = (Object.keys(BACKGROUNDS) as GraphTheme[]).map(value => ({
+    value,
+    label:       BACKGROUNDS[value].label,
+    description: BACKGROUNDS[value].description,
+}));
+
+export function isGraphTheme(value: unknown): value is GraphTheme {
+    return typeof value === 'string' && Object.hasOwn(BACKGROUNDS, value);
+}
+
+function drawBackground(ctx: SKRSContext2D, w: number, h: number, seed: string, theme: GraphTheme): void {
+    const bg = BACKGROUNDS[theme] ?? BACKGROUNDS[DEFAULT_GRAPH_THEME];
+    ctx.fillStyle = bg.base;
+    ctx.fillRect(0, 0, w, h);
+    bg.draw(ctx, w, h, seededRng(seed));
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function roundedRect(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number): void {
@@ -163,7 +264,11 @@ function fitText(ctx: SKRSContext2D, text: string, maxW: number): string {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export function buildRoleGraphBuffer(roles: GraphRole[], groupName: string): Buffer {
+export function buildRoleGraphBuffer(
+    roles:     GraphRole[],
+    groupName: string,
+    theme:     GraphTheme = DEFAULT_GRAPH_THEME,
+): Buffer {
     if (roles.length === 0) {
         const c = createCanvas(320, 80);
         const x = c.getContext('2d');
@@ -244,8 +349,8 @@ export function buildRoleGraphBuffer(roles: GraphRole[], groupName: string): Buf
     const canvas = createCanvas(canvasW, canvasH);
     const ctx    = canvas.getContext('2d');
 
-    // Background (moon + stars)
-    drawBackground(ctx, canvasW, canvasH, groupName);
+    // Background decor (theme-specific)
+    drawBackground(ctx, canvasW, canvasH, groupName, theme);
 
     // Title
     ctx.globalAlpha  = 1;
