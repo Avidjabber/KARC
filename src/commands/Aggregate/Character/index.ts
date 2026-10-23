@@ -49,13 +49,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommand(sub =>
         sub
             .setName('purge')
-            .setDescription('Delete ALL of a member\'s characters, by user ID (requires Administrator)')
-            .addStringOption(opt =>
-                opt
-                    .setName('userid')
-                    .setDescription('The Discord user ID whose characters to delete (works even if they left the server)')
-                    .setRequired(true),
-            ),
+            .setDescription('Browse and delete any character in this server (requires Administrator)'),
     );
 
 export const modalSubcommands     = new Set(['create', 'edit']);

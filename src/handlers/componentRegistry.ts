@@ -22,6 +22,7 @@ import { handleViewRolesUpdate } from '../commands/Aggregate/Group/roleUpdateHan
 import { handleViewMembersUpdate, handleViewMembersPage } from '../commands/Aggregate/Group/viewMembersUpdateHandlers.js';
 import { handleGroupPickPage, handleGroupPickView } from '../commands/Aggregate/Group/groupPickHandlers.js';
 import { handleGroupListPage, handleGroupListInfo } from '../commands/Aggregate/Group/listHandlers.js';
+import { handleHelpPage } from '../commands/TopLevel/Utility/help.js';
 import { handleRemoveCharSelect } from '../commands/Aggregate/Roles/removeCharSelectHandlers.js';
 import { handleRemoveConfirm, handleRemoveCancel } from '../commands/Aggregate/Roles/removeConfirmHandlers.js';
 import { handleGroupDeleteGroupSelect } from '../commands/Aggregate/Group/deleteGroupSelectHandlers.js';
@@ -44,7 +45,7 @@ import {
 } from '../commands/Aggregate/Character/editResidenceHandlers.js';
 import { handleCharacterDeleteSelect, handleCharacterDeleteConfirm, handleCharacterDeleteCancel } from '../commands/Aggregate/Character/deleteHandlers.js';
 import { handleCharacterInfoSelect } from '../commands/Aggregate/Character/infoHandlers.js';
-import { handlePurgeConfirm, handlePurgeCancel } from '../commands/Aggregate/Character/purgeHandlers.js';
+import { handlePurgePage, handlePurgeDelete, handlePurgeConfirm, handlePurgeCancel } from '../commands/Aggregate/Character/purgeHandlers.js';
 
 type AnyComponentInteraction =
     | MessageComponentInteraction
@@ -107,12 +108,15 @@ export const buttonHandlers: ComponentHandler[] = [
     { prefix: 'group_pick_view:', handler: i => handleGroupPickView(i as ButtonInteraction) },
     { prefix: 'group_list_page:', handler: i => handleGroupListPage(i as ButtonInteraction) },
     { prefix: 'group_list_info:', handler: i => handleGroupListInfo(i as ButtonInteraction) },
+    { prefix: 'help_page:',       handler: i => handleHelpPage(i as ButtonInteraction) },
     { prefix: 'roles_create_next:', handler: i => handleCreateNext(i as ButtonInteraction) },
     { prefix: 'roles_edit_next:', handler: i => handleEditNext(i as ButtonInteraction) },
     { prefix: 'group_delete_confirm:', handler: i => handleGroupDeleteConfirm(i as ButtonInteraction) },
     { prefix: 'group_delete_cancel',   handler: i => handleGroupDeleteCancel(i as ButtonInteraction) },
     { prefix: 'character_delete_confirm:', handler: i => handleCharacterDeleteConfirm(i as ButtonInteraction) },
     { prefix: 'character_delete_cancel',   handler: i => handleCharacterDeleteCancel(i as ButtonInteraction) },
+    { prefix: 'character_purge_page:',    handler: i => handlePurgePage(i as ButtonInteraction) },
+    { prefix: 'character_purge_delete:',  handler: i => handlePurgeDelete(i as ButtonInteraction) },
     { prefix: 'character_purge_confirm:', handler: i => handlePurgeConfirm(i as ButtonInteraction) },
     { prefix: 'character_purge_cancel',   handler: i => handlePurgeCancel(i as ButtonInteraction) },
     { prefix: 'character_editpanel_name:', handler: i => handleEditPanelNameButton(i as ButtonInteraction) },

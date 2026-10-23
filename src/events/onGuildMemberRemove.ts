@@ -51,7 +51,7 @@ export default async function onGuildMemberRemove(member: GuildMember | PartialG
                 .addTextDisplayComponents(
                     new TextDisplayBuilder().setContent(
                         `**${member.user.tag}** just left **${member.guild.name}** while still holding a role in your group(s):\n\n${lines}\n\n`
-                        + `-# Nothing has been changed. Run \`/roles remove\` or \`/character purge userid:${userId}\` if you want to clean this up.`,
+                        + `-# Nothing has been changed. Run \`/roles remove\` or \`/character purge\` if you want to clean this up.`,
                     ),
                 );
 
