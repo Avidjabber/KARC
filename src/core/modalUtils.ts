@@ -23,5 +23,11 @@ export function extractField(interaction: ModalSubmitInteraction, customId: stri
 
     const raw = search(rawComponents);
     if (raw !== undefined) return raw;
-    try { return interaction.fields.getTextInputValue(customId); } catch { return ''; }
+    // Parsed fields cover every component type (text input, select, radio group, ...)
+    try {
+        const field = interaction.fields.getField(customId) as { value?: unknown; values?: unknown[] };
+        if (field.value !== undefined && field.value !== null) return String(field.value);
+        if (Array.isArray(field.values) && field.values.length > 0) return String(field.values[0]);
+    } catch { /* field not present */ }
+    return '';
 }
