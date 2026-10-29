@@ -2,10 +2,11 @@ import { ButtonInteraction, MessageFlags } from 'discord.js';
 import { db } from '../../../db/index.js';
 import { loadAuthorizedSession, renderPanel } from './editShared.js';
 
-// Each residence row costs 3 components (Section + its text + its accessory button); with the
-// container/header/dividers/nav-rows overhead, Discord's 40-component-per-message cap for
-// Components V2 caps this well below 10 per page — keep real headroom below that ceiling.
-const PAGE_SIZE = 5;
+// Each residence row costs 3 components (Section + its text + its accessory button). The fixed
+// overhead is 9 (container + header + divider, nav row + 2 buttons, action row + 2 buttons), so a
+// full page is 9 + 10×3 = 39 of Discord's 40-component cap for Components V2 — adding any other
+// component to this screen means lowering this.
+const PAGE_SIZE = 10;
 
 function buildResidenceListComponents(
     sessionId:           string,
@@ -32,24 +33,27 @@ function buildResidenceListComponents(
         };
     });
 
-    return [{
+    const components: unknown[] = [{
         type:       17,
         components: [
             { type: 10, content: 'Select a Residence:' },
             { type: 14, divider: true },
             ...sections,
-            { type: 14, divider: true },
-            { type: 1, components: [
-                { type: 2, style: 2, label: '◀', custom_id: `character_editpanel_residence_page:${sessionId}:${safePage - 1}`, disabled: safePage === 0 },
-                { type: 2, style: 2, label: `${safePage + 1} / ${totalPages}`, custom_id: 'character_editpanel_noop', disabled: true },
-                { type: 2, style: 2, label: '▶', custom_id: `character_editpanel_residence_page:${sessionId}:${safePage + 1}`, disabled: safePage === totalPages - 1 },
-            ] },
-            { type: 1, components: [
-                { type: 2, style: 4, label: 'Clear Residence', custom_id: `character_editpanel_residence_clear:${sessionId}`, disabled: currentResidenceId === null },
-                { type: 2, style: 2, label: 'Back', custom_id: `character_editpanel_back:${sessionId}` },
-            ] },
         ],
     }];
+
+    if (totalPages > 1) {
+        components.push({ type: 1, components: [
+            { type: 2, style: 2, label: '◀', custom_id: `character_editpanel_residence_page:${sessionId}:${safePage - 1}`, disabled: safePage === 0 },
+            { type: 2, style: 2, label: '▶', custom_id: `character_editpanel_residence_page:${sessionId}:${safePage + 1}`, disabled: safePage === totalPages - 1 },
+        ] });
+    }
+    components.push({ type: 1, components: [
+        { type: 2, style: 4, label: 'Clear Residence', custom_id: `character_editpanel_residence_clear:${sessionId}`, disabled: currentResidenceId === null },
+        { type: 2, style: 2, label: 'Cancel', custom_id: `character_editpanel_back:${sessionId}` },
+    ] });
+
+    return components;
 }
 
 async function showResidencePage(interaction: ButtonInteraction, sessionId: string, page: number): Promise<void> {

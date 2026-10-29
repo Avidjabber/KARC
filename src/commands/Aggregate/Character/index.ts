@@ -52,10 +52,7 @@ export const data = new SlashCommandBuilder()
             .setDescription('Browse and delete any character in this server (requires Administrator)'),
     );
 
-export const modalSubcommands     = new Set(['create', 'edit']);
-// Public when there's a character to show, but replies ephemerally when there isn't —
-// so it manages its own first reply.
-export const manualAckSubcommands = new Set(['info']);
+export const modalSubcommands = new Set(['create', 'edit']);
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
     const sub = interaction.options.getSubcommand();

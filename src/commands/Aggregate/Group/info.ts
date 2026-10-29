@@ -3,7 +3,10 @@ import { colors } from '../../../core/colors.js';
 import { DEFAULT_GRAPH_THEME, GRAPH_THEME_OPTIONS } from '../../../core/roleGraph.js';
 import { db } from '../../../db/index.js';
 
-const PAGE_SIZE = 10;
+// Each member is one text display, so components aren't the constraint — Discord's 4000-char text cap is.
+// The header can run ~470 chars (200-char name and code name), leaving 20 × ENTRY_MAX_LENGTH under the cap.
+const PAGE_SIZE = 20;
+const ENTRY_MAX_LENGTH = 170;
 
 type GroupWithMembers = {
     id:              string;
@@ -53,26 +56,25 @@ export async function buildInfoComponents(guild: Guild, group: GroupWithMembers,
         for (const m of pageMembers) {
             inner.push({
                 type:    10,
-                content: `${m.groupRole.position} - **${m.groupRole.name}** : ${m.character.name}\n*${handle(m.userId)}*`,
+                content: `${m.groupRole.position} - **${m.groupRole.name}** : ${m.character.name}\n*${handle(m.userId)}*`.slice(0, ENTRY_MAX_LENGTH),
             });
         }
     }
 
-    inner.push({ type: 14, divider: true });
+    const components: unknown[] = [{ type: 17, components: inner }];
 
     if (totalPages > 1) {
-        inner.push({
+        components.push({
             type:       1,
             components: [
                 { type: 2, style: 2, label: '◀', custom_id: `group_info_page:${group.id}:${safePage - 1}`, disabled: safePage === 0 },
-                { type: 2, style: 2, label: `${safePage + 1} / ${totalPages}`, custom_id: 'group_info_noop', disabled: true },
                 { type: 2, style: 2, label: '▶', custom_id: `group_info_page:${group.id}:${safePage + 1}`, disabled: safePage === totalPages - 1 },
             ],
         });
     }
 
     return [
-        { type: 17, components: inner },
+        ...components,
         {
             type: 1,
             components: [

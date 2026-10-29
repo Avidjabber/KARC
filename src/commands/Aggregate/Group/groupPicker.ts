@@ -25,17 +25,17 @@ export function buildGroupPickerComponents(groups: PickableGroup[], page: number
         })),
     ];
 
+    const components: unknown[] = [{ type: 17, components: inner }];
+
     if (totalPages > 1) {
-        inner.push({ type: 14, divider: true });
-        inner.push({
+        components.push({
             type:       1,
             components: [
                 { type: 2, style: 2, label: '◀', custom_id: `group_pick_page:${action}:${safePage - 1}`, disabled: safePage === 0 },
-                { type: 2, style: 2, label: `${safePage + 1} / ${totalPages}`, custom_id: 'group_pick_noop', disabled: true },
                 { type: 2, style: 2, label: '▶', custom_id: `group_pick_page:${action}:${safePage + 1}`, disabled: safePage === totalPages - 1 },
             ],
         });
     }
 
-    return [{ type: 17, components: inner }];
+    return components;
 }

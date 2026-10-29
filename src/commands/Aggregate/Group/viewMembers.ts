@@ -20,6 +20,9 @@ export function fetchGroupWithMembers(groupId: string) {
 
 // Discord caps a single Text Display's content at 4000 chars — stay well under that.
 const MAX_CHARS_PER_PAGE = 3500;
+// Discord caps a message at 40 components. Fixed overhead is 10 (container, 3 header texts, divider,
+// nav row + 2 buttons, Update row + button), leaving 30 for role blocks.
+const MAX_BLOCKS_PER_PAGE = 30;
 
 export type GroupWithMemberRoles = {
     id:       string;
@@ -65,7 +68,10 @@ function paginateRoles(roles: RoleData[]): string[][] {
     const addComponent = (text: string) => { current.push(text); currentChars += text.length + 1; };
 
     for (const role of roles) {
-        if (current.length > 0 && currentChars + role.header.length + 1 > MAX_CHARS_PER_PAGE) flushPage();
+        // A role puts at most 2 blocks (header + one member chunk) on a page before continuing on the next.
+        const outOfChars  = currentChars + role.header.length + 1 > MAX_CHARS_PER_PAGE;
+        const outOfBlocks = current.length + 2 > MAX_BLOCKS_PER_PAGE;
+        if (current.length > 0 && (outOfChars || outOfBlocks)) flushPage();
         addComponent(role.header);
 
         let lineIdx = 0;
@@ -120,7 +126,7 @@ export function buildViewMembersComponents(group: GroupWithMemberRoles, page = 0
 
     const inner: unknown[] = [
         { type: 10, content: `## ${group.name}` },
-        { type: 10, content: `-# Owner: <@${group.ownerId}>${totalPages > 1 ? ` — page ${safePage + 1}/${totalPages}` : ''}` },
+        { type: 10, content: `-# Owner: <@${group.ownerId}>` },
         { type: 10, content: `**Total characters:** ${totalCharacters}` },
         { type: 14, divider: true },
     ];
@@ -131,27 +137,20 @@ export function buildViewMembersComponents(group: GroupWithMemberRoles, page = 0
         for (const block of pageBlocks) inner.push({ type: 10, content: block });
     }
 
-    inner.push({ type: 14, divider: true });
+    const components: unknown[] = [{ type: 17, components: inner }];
 
-    const buttonRow: unknown[] = [];
     if (totalPages > 1) {
-        buttonRow.push(
-            { type: 2, style: 2, label: '◀', custom_id: `group_viewmembers_page:${group.id}:${safePage - 1}`, disabled: safePage === 0 },
-            { type: 2, style: 2, label: `${safePage + 1} / ${totalPages}`, custom_id: 'group_viewmembers_noop', disabled: true },
-            { type: 2, style: 2, label: '▶', custom_id: `group_viewmembers_page:${group.id}:${safePage + 1}`, disabled: safePage === totalPages - 1 },
-        );
-    }
-    buttonRow.push({ type: 2, style: 1, label: 'Update', custom_id: `group_viewmembers_update:${group.id}` });
-
-    return [
-        {
-            type:       17,
+        components.push({
+            type:       1,
             components: [
-                ...inner,
-                { type: 1, components: buttonRow },
+                { type: 2, style: 2, label: '◀', custom_id: `group_viewmembers_page:${group.id}:${safePage - 1}`, disabled: safePage === 0 },
+                { type: 2, style: 2, label: '▶', custom_id: `group_viewmembers_page:${group.id}:${safePage + 1}`, disabled: safePage === totalPages - 1 },
             ],
-        },
-    ];
+        });
+    }
+    components.push({ type: 1, components: [{ type: 2, style: 1, label: 'Update', custom_id: `group_viewmembers_update:${group.id}` }] });
+
+    return components;
 }
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {

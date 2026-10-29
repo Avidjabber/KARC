@@ -67,19 +67,19 @@ export async function buildPurgeListComponents(guild: Guild, page: number, notic
         }
     }
 
+    const components: unknown[] = [{ type: 17, components: inner }];
+
     if (totalPages > 1) {
-        inner.push({ type: 14, divider: true });
-        inner.push({
+        components.push({
             type:       1,
             components: [
                 { type: 2, style: 2, label: '◀', custom_id: `character_purge_page:${safePage - 1}`, disabled: safePage === 0 },
-                { type: 2, style: 2, label: `${safePage + 1} / ${totalPages}`, custom_id: 'character_purge_noop', disabled: true },
                 { type: 2, style: 2, label: '▶', custom_id: `character_purge_page:${safePage + 1}`, disabled: safePage === totalPages - 1 },
             ],
         });
     }
 
-    return [{ type: 17, components: inner }];
+    return components;
 }
 
 export function buildPurgeConfirmation(

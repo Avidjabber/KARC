@@ -36,7 +36,7 @@ import {
     handleEditNameModal,
     handleEditBioModal,
 } from '../commands/Aggregate/Character/editHandlers.js';
-import { handleEditPanelCareerButton, handleEditPanelCareerSelect } from '../commands/Aggregate/Character/editCareerHandlers.js';
+import { handleEditPanelCareerButton, handleEditPanelCareerPage, handleEditPanelCareerSelect } from '../commands/Aggregate/Character/editCareerHandlers.js';
 import {
     handleEditPanelResidenceButton,
     handleEditPanelResidencePage,
@@ -125,6 +125,7 @@ export const buttonHandlers: ComponentHandler[] = [
     { prefix: 'character_editpanel_name:', handler: i => handleEditPanelNameButton(i as ButtonInteraction) },
     { prefix: 'character_editpanel_bio:', handler: i => handleEditPanelBioButton(i as ButtonInteraction) },
     { prefix: 'character_editpanel_career:', handler: i => handleEditPanelCareerButton(i as ButtonInteraction) },
+    { prefix: 'character_editpanel_career_page:', handler: i => handleEditPanelCareerPage(i as ButtonInteraction) },
     { prefix: 'character_editpanel_residence:', handler: i => handleEditPanelResidenceButton(i as ButtonInteraction) },
     { prefix: 'character_editpanel_residence_page:', handler: i => handleEditPanelResidencePage(i as ButtonInteraction) },
     { prefix: 'character_editpanel_residence_select:', handler: i => handleEditPanelResidenceSelect(i as ButtonInteraction) },
